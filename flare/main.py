@@ -57,7 +57,7 @@ try:
     app.native.window_args["zoomable"] = True
     app.native.window_args["text_select"] = True
     app.native.start_args["icon"] = r"data\assets\border.png"
-    ui.run(favicon=svg, reload=True, port=native.find_open_port(), native=True, reconnect_timeout=0)
+    ui.run(favicon=svg, reload=False, port=native.find_open_port(), native=True, reconnect_timeout=0)
 except Exception as Argument:
     # creating/opening a file
     f = open("errorlog.txt", "a")
