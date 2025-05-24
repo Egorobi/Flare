@@ -7,17 +7,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+          
       - name: Create virtual environment
         run: |
           python -m venv venv
-          .\venv\Scripts\activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          venv\Scripts\python.exe -m pip install --upgrade pip
+          venv\Scripts\python.exe -m pip install -r requirements.txt
+          
       - name: Create executable
         run: |
-          .\venv\Scripts\activate
-          pyinstaller Flare.spec --noconfirm
+           venv\Scripts\pyinstaller.exe Flare.spec --noconfirm
+           
+      - name: Upload executable folder as ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-executable
+          path: dist/Flare/
