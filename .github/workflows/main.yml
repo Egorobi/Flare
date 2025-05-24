@@ -5,10 +5,22 @@ jobs:
   pyinstaller-build:
     runs-on: windows-latest
     steps:
-      - name: Create Executable
-        uses: Martin005/pyinstaller-action@v1.2.0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python_ver: '3.13'
-          spec: 'Flare.spec'
-          requirements: 'requirements.txt'
-          upload_exe_with_name: 'Flare Windows'
+          python-version: '3.13'
+      - name: Create virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Verify installed packages
+        run: |
+          source venv/bin/activate
+          pip freeze
+      - name: Create executable
+        run: |
+          pyinstaller Flare.spec --noconfirm
