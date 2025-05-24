@@ -17,16 +17,14 @@ jobs:
         shell: cmd
         run: |
           python -m venv venv
-          .\venv\Scripts\activate
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
+          venv\Scripts\python.exe -m pip install --upgrade pip
+          venv\Scripts\python.exe -m pip install -r requirements.txt
           
       - name: Create executable
         shell: cmd
         run: |
-           .\venv\Scripts\activate
-           pyinstaller Flare.spec --noconfirm
-           ls
+           venv\Scripts\pyinstaller.exe Flare.spec --noconfirm
+           echo "::debug::%CD%"
            
       - name: Upload executable folder as ZIP
         uses: actions/upload-artifact@v4
