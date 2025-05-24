@@ -19,4 +19,5 @@ jobs:
           pip install -r requirements.txt
       - name: Create executable
         run: |
+          .\venv\Scripts\activate
           pyinstaller Flare.spec --noconfirm
