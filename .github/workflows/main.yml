@@ -1,0 +1,13 @@
+on:
+  workflow_dispatch:
+jobs:
+  pyinstaller-build:
+    runs-on: windows-latest
+    steps:
+      - name: Create Executable
+        uses: Martin005/pyinstaller-action@v1.2.0
+        with:
+          python_ver: '3.13'
+          spec: 'Flare.spec'
+          requirements: 'requirements.txt'
+          upload_exe_with_name: 'Flare Windows'
