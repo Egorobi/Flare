@@ -26,6 +26,7 @@ jobs:
         run: |
            .\venv\Scripts\activate
            pyinstaller Flare.spec --noconfirm
+           ls
            
       - name: Upload executable folder as ZIP
         uses: actions/upload-artifact@v4
