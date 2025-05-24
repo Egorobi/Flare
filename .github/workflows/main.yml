@@ -17,10 +17,6 @@ jobs:
           .\venv\Scripts\activate
           pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Verify installed packages
-        run: |
-          source venv/bin/activate
-          pip freeze
       - name: Create executable
         run: |
           pyinstaller Flare.spec --noconfirm
