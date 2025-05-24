@@ -1,3 +1,4 @@
+name: Make Executables
 on:
   workflow_dispatch:
 jobs:
