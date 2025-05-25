@@ -1,11 +1,8 @@
 from nicegui import ui
 from saver import Saver
 from colorschemes import color_schemes
-from character import Character
-# from editors.inventory import InventoryManager
-# from editors.notes import NotesManager
-# from modules.loader import LoadingDialog
-from modules.dialogs import LongRestDialog, StatInfo
+
+port = None
 
 char = None
 

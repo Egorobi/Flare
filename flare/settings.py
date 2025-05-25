@@ -46,7 +46,6 @@ class Settings():
 
         with ui.card().classes("everything transparent no-shadow items-center").style("max-width: 85rem; min-width:85rem;"):
             with ui.column().classes("justify-left"):
-                # ui.button(icon="arrow_back", on_click=lambda: ui.navigate.to("/character_select")).props("outline")
                 ui.button(icon="arrow_back", on_click=lambda: self.go_back()).props("outline")
 
                 ui.label("Content Directory").classes("font-bold text-primary text-xl")
@@ -105,6 +104,10 @@ class Settings():
                             self.frame_buttons[f] = ui.image(f"data/assets/frames/{f}/border_frame.png").on("click", lambda f=f: self.update_frames(f)).classes("w-20 h-20").props("flat bordered")
                             ui.label(f.capitalize())
                     self.update_frame_select(self.saver.get_frame_style())
+                
+                with ui.row().classes("items-center"):
+                    ui.label("App running on: ").classes("text-slate-400")
+                    ui.code(f"http://localhost:{session.port}")
 
     def go_back(self):
         loading = LoadingDialog()

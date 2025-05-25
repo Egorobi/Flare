@@ -2,6 +2,7 @@
 **/__pycache__
 /build
 /dist
+/Output
 /data/saves/*
 /data/saves/!colors.json
 /data/saves/!savedir
