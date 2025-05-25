@@ -24,6 +24,7 @@ jobs:
         shell: cmd
         run: |
            venv\Scripts\pyinstaller.exe Flare.spec --noconfirm
+           echo "::debug::%CD%"
            
       - name: Upload executable folder as ZIP
         uses: actions/upload-artifact@v4
