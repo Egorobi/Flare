@@ -20,14 +20,25 @@ jobs:
           venv\Scripts\python.exe -m pip install --upgrade pip
           venv\Scripts\python.exe -m pip install -r requirements.txt
           
-      - name: Create executable
+      - name: Create windows executable
         shell: cmd
         run: |
            venv\Scripts\pyinstaller.exe Flare.spec --noconfirm
            echo "::debug::%CD%"
            
-      - name: Upload executable folder as ZIP
+      - name: Upload windows executable folder as ZIP
         uses: actions/upload-artifact@v4
         with:
           name: windows-executable
           path: dist/Flare/
+
+      - name: Compile .ISS to .EXE Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: inno-script.iss
+
+      - name: Upload windows installer as ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: Output/
