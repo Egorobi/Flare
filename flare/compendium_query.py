@@ -9,6 +9,8 @@ class CompendiumQuery:
     def __init__(self, source_path):
         self.source_path = source_path
 
+        self.level = None # used only when querying for a character
+
         if len(storage.compendium) == 0:
             self.fill_compendium()
 
@@ -251,11 +253,22 @@ class CompendiumQuery:
             action = feature.find("./sheet").attrib.get("action", None)
             name = feature.find("./sheet").attrib.get("alt", name)
             display = feature.find("./sheet").attrib.get("display", "true") == "true"
-        # TODO sheet descriptions that change by level (Call to the Wave)
-        sheet_description = feature.find("./sheet/description").text if feature.find("./sheet/description") is not None else None
+        sheet_descriptions = feature.findall("./sheet/description")
+        if len(sheet_descriptions) == 1:
+            sheet_description = sheet_descriptions[0].text
+        elif len(sheet_descriptions) > 1:
+            highest_level = 0
+            sheet_description = None
+            for desc in sheet_descriptions:
+                description_level = int(desc.attrib.get("level", 0))
+                if description_level <= self.level and description_level > highest_level:
+                    highest_level = description_level
+                    sheet_description = desc.text
+        else:
+            sheet_description = None
+        
         if sheet_description is not None:
             sheet_description = re.sub("[\n]", "<br />", sheet_description)
-        # sheetDescription = et.tostring(feature.find("./sheet/description"), method='xml',with_tail=False).decode('UTF-8') if feature.find("./sheet/description") != None else None
             if action is None:
                 if re.search("[Yy]ou can take an action", sheet_description):
                     action = "Action"

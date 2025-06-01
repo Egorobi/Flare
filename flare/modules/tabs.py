@@ -31,7 +31,6 @@ class Tabs(Module):
             self.show_actions_tab(actions_tab)
             # SPELL LIST
             self.show_spells(spells_tab)
-            # TODO spells double when page reloaded - might be fixed now
             # INVENTORY
             self.show_inventory(inventory_tab)
             # # FEATURES

@@ -14,6 +14,7 @@ class Query:
         self.parser = et.XMLParser(remove_blank_text=False, compact=False, strip_cdata=False)
         self.character_file = character_path
         self.compendium = CompendiumQuery(source_path)
+        self.compendium.level = Query.query_level_from_file(character_path)
         self.variables = {}
         self.variable_bonus = {} # (stat, bonus) -> value
         self.contributions = {} # stat -> [(stat, alt/element, value, bonus=None)]
@@ -927,3 +928,9 @@ class Query:
         tree = et.parse(character_file)
         root = tree.getroot()
         return root.find(".//display-properties/name").text
+
+    @staticmethod
+    def query_level_from_file(character_file):
+        tree = et.parse(character_file)
+        root = tree.getroot()
+        return int(root.find(".//display-properties/level").text)
