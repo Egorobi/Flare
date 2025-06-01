@@ -1,7 +1,6 @@
 import urllib.parse
 from nicegui import ui, native, app, Client
 from nicegui.page import page
-import sys
 from sheet import Sheet
 from character_select import SelectPage
 from settings import Settings

@@ -266,7 +266,7 @@ class CompendiumQuery:
                     sheet_description = desc.text
         else:
             sheet_description = None
-        
+
         if sheet_description is not None:
             sheet_description = re.sub("[\n]", "<br />", sheet_description)
             if action is None:

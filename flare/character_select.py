@@ -2,7 +2,6 @@ import tkinter.filedialog as fd
 from tkinter import Tk
 import urllib.parse
 import os
-import sys
 from nicegui import ui, run
 from modules.head_module import HeadModule
 from modules.loader import LoadingDialog
@@ -54,9 +53,9 @@ class SelectPage():
                 ui.button("Settings", icon="settings", on_click=lambda: ui.navigate.to("/settings")).props("outline")
                 # lil credit
                 ui.link("Built by Egorobi", "https://github.com/Egorobi", new_tab=True).classes("italic text-sm text-white text-center").style("opacity: 0.4;")
-        
+
         # version label
-        ui.label(f"Flare version {VERSION}").classes("text-slate-400 opacity-50 absolute-bottom-right")
+        ui.label(f"Version {VERSION}").classes("text-slate-400 opacity-50 absolute-bottom-right q-pa-xs")
 
     def open_character_button(self, name):
         # ui.navigate.to("/character_sheet/"+urllib.parse.quote(name))

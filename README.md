@@ -1,6 +1,6 @@
 ![Flare Splash](data/assets/banner_thick.png)
-# What is Flare
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y01FNNX5)
+# What is Flare
 
 Flare is a third party companion to the [Aurora Character Builder](https://aurorabuilder.com) that I made to view and track characters made with Aurora in a more user friendly way.
 
@@ -46,7 +46,7 @@ Use the installer for the latest release, or download the executable if you want
 
 After installing and opening Flare for the first time, navigate to the Settings and set the Content Directory to point to the folder where Aurora stores content files. In most cases this will be the "custom" subfolder of "5e Character Builder".
 
-Once the content folder is set up you are free to add characters, simply press "Load Character" in the main screen and navigate to your Aurora character file. Selecting this file will open it and save it for future access. If you edit the character file in Aurora in the future and refresh the page in Flare, the changes will be reflected.
+Once the content folder is set up you are free to add characters, simply press "Load Character" in the main screen and navigate to your Aurora character file (sometimes the dialog may appear hidden and you need to find it with alt+tab). Selecting this file will open it and save it for future access. If you edit the character file in Aurora in the future and refresh the page in Flare, the changes will be reflected.
 
 That's it, you're ready to play!
 
