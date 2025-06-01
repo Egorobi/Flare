@@ -10,6 +10,7 @@ class ErrorPage():
         self.saver = Saver()
         self.character_path = None
         self.traceback = ""
+        self.exception = ""
 
     def show_error_page(self, exception: Exception):
         # ui.label("Custom oopsie")
@@ -29,11 +30,9 @@ class ErrorPage():
             with ui.column().classes("w-full items-center"):
                 ui.label("Internal Error").classes("text-xl font-bold text-primary")
                 ui.image("data/assets/error_screen.png").classes("w-40 h-40").classes("frame")
-                self.traceback = "\n".join(traceback.format_tb(exception.__traceback__))
+                self.exception = "".join(traceback.format_exception(exception))
                 ui.label("Refer to the Troubleshooting guide on the GitHub repository if the issue persists")
                 ui.button("Return to Home", on_click=lambda: ui.navigate.to("/character_select")).props("outline")
                 traceback_switch = ui.checkbox("Show Traceback").classes("text-slate-400").props("checked-icon='arrow_drop_down' unchecked-icon='arrow_drop_up'")
-                ui.code(self.traceback).bind_visibility_from(traceback_switch, 'value')
-
-    def show_traceback(self):
-        ui.code(self.traceback)
+                # ui.markdown(f"```python\n{self.exception}\n```").bind_visibility_from(traceback_switch, 'value')
+                ui.code(f"{self.exception.strip()}").bind_visibility_from(traceback_switch, 'value')

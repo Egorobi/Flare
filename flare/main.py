@@ -1,6 +1,7 @@
 import urllib.parse
 from nicegui import ui, native, app, Client
 from nicegui.page import page
+import sys
 from sheet import Sheet
 from character_select import SelectPage
 from settings import Settings
@@ -10,8 +11,9 @@ from saver import Saver
 import colorschemes
 try:
     import pyi_splash # type: ignore
+    SPLASH = True
 except:
-    print("pyi_splash unavailable")
+    SPLASH = False
 import session
 
 @ui.page("/")
@@ -50,12 +52,6 @@ def custom_error_page(request: Request, exception: Exception):
 
 try:
     app.add_static_files("/assets", "./data/assets")
-
-    try:
-        pyi_splash.close()
-    except:
-        print("pyi_splash unavailable")
-
     ui.navigate.to("/character_select")
     ui.page_title('Flare')
 
@@ -72,6 +68,8 @@ try:
     app.native.start_args["icon"] = r"data\assets\border.png"
     port = native.find_open_port()
     session.port = port
+    if SPLASH:
+        pyi_splash.close()
     ui.run(favicon=svg, reload=False, port=port, native=True, reconnect_timeout=10)
 except Exception as Argument:
     # creating/opening a file

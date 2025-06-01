@@ -57,7 +57,7 @@ class Settings():
                         self.content_label = ui.label(content).classes("text-nowrap")
                     ui.button(icon="edit", on_click=lambda: self.open_content_dialog()).props("outline dense").classes("text-sm w-9 h-9")
                     with ui.icon("question_mark").classes("text-primary").props("size=sm"):
-                        ui.tooltip("The topmost folder of the aurora additional content directory").classes("adapttooltip")
+                        ui.tooltip(r"The topmost folder of the aurora additional content directory (5e Character Builder\custom)").classes("adapttooltip")
 
                 ui.label("Main Menu Color").classes("font-bold text-primary text-xl")
                 ui.label("(Character sheet colors are set from the sheet itself)").classes("italic text-xs")
@@ -108,6 +108,8 @@ class Settings():
                 with ui.row().classes("items-center"):
                     ui.label("App running on: ").classes("text-slate-400")
                     ui.code(f"http://localhost:{session.port}")
+
+                ui.button("Report a Problem", on_click=lambda: ui.navigate.to('https://github.com/Egorobi/Flare')).props("outline")
 
     def go_back(self):
         loading = LoadingDialog()

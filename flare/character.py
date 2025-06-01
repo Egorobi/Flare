@@ -237,6 +237,12 @@ class Character:
     def set_used_hitdice(self, dice_class, uses):
         self.saver.record_used_hitdice(self.name, dice_class, uses)
 
+    def get_death_saves(self):
+        return self.saver.get_death_saves(self.name)
+
+    def set_death_saves(self, successes, failures):
+        self.saver.record_death_saves(self.name, successes, failures)
+
     def get_racial_traits(self):
         return self.query.get_racial_traits()
 

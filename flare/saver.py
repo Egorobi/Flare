@@ -169,6 +169,7 @@ class Saver():
         _ = et.SubElement(root, "spellSlots")
         hp = et.SubElement(root, "hitpoints")
         hp.attrib["temp"] = "0"
+        _ = et.SubElement(root, "death_saves")
         _ = et.SubElement(root, "hitdice")
         _ = et.SubElement(root, "portrait")
         _ = et.SubElement(root, "description")
@@ -281,6 +282,22 @@ class Saver():
         current = int(hitpoints.attrib["current"])
         temp = int(hitpoints.attrib["temp"])
         return current, temp
+
+    # DEATH SAVES
+
+    def record_death_saves(self, name, successes: int, failures: int):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, saves = self.get_sub_element("death_saves", None, tree)
+        saves.attrib["successes"] = str(max(0, min(successes, 3)))
+        saves.attrib["failures"] = str(max(0, min(failures, 3)))
+        tree.write(filename, pretty_print=True)
+
+    def get_death_saves(self, name):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, death_saves = self.get_sub_element("death_saves", None, tree)
+        return int(death_saves.attrib.get("successes", 0)), int(death_saves.attrib.get("failures", 0))
 
     # DARK MODE
 

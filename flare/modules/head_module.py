@@ -72,6 +72,11 @@ class HeadModule(Module):
         # background-image: linear-gradient(0.25turn, #151c24, #141414, #141414, #151c24);
         # filter: hue-rotate({hueRotation}deg) saturate({saturation}%) brightness({brightness}%);
         ui.add_head_html(f'''
+        <script>
+        window.onload = () => {{
+            emitEvent('content_loaded');
+        }};
+        </script>
         <style type="text/tailwindcss" lang="scss">     
             body{{
                 font-family: "Roboto", sans-serif;
