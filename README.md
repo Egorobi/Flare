@@ -1,4 +1,4 @@
-![Flare Splash](data\assets\banner_thick.png)
+![Flare Splash](data/assets/banner_thick.png)
 # What is Flare
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y01FNNX5)
 
@@ -6,7 +6,7 @@ Flare is a third party companion to the [Aurora Character Builder](https://auror
 
 Flare is **not** a replacement for Aurora, you'll still need to build your characters separately, but Flare syncs with any changes you make and provides you with a nice UI and utilities to interact with your character during a session.
 
-![Character Sheet](images\sheet.png)
+![Character Sheet](images/sheet.png)
 
 # :page_with_curl: Features
 ## :busts_in_silhouette: Easy Character Loading
@@ -14,7 +14,7 @@ Flare loads your character with just a few clicks and gives you access to everyt
 
 You can also view the details of you character's spells, items, and features seamlessly within the app.
 
-![Spell Info](images\spell_info.png)
+![Spell Info](images/spell_info.png)
 
 ## :ballot_box_with_check: Resource Tracking
 Flare makes it easy to keep track of Hitpoints, Hitdice, Spell Slots, Feature Charges, Inspiration, Conditions, Currency, and more.
@@ -28,16 +28,16 @@ You can also automatically roll checks, saves, and attacks with advantage or dis
 
 Custom Dice Selection             |  Roll Result
 :-------------------------:|:-------------------------:
-<img src="images\dice_menu.png" width="60">  |  <img src="images\roll_result.png" width="200">
+<img src="images/dice_menu.png" width="60">  |  <img src="images/roll_result.png" width="200">
 
 ## :art: Customization
 Match your character's look with different color schemes as well as custom colors, dark mode, and different backgrounds.
 
-![](images\red_light.png)
+![](images/red_light.png)
 
 You can also customize the frames from one of the packaged sets, or design your own!
 
-![](images\frame_simple.png)
+![](images/frame_simple.png)
 
 # :memo: How to Use
 Flare requires Aurora to be installed to work.
