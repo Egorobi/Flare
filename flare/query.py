@@ -422,7 +422,7 @@ class Query:
                     # replace old contributor with new one
                     for index, contrib in enumerate(contribs):
                         if contrib[3] == bonus:
-                            contribs[index] = (contributor, value, bonus)
+                            contribs[index] = (contributor, alt, value, bonus)
             # store contribution
             self.contributions[name] = contribs
         else:
