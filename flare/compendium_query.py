@@ -177,6 +177,8 @@ class CompendiumQuery:
         adorner = self.find_element(f".//element[@type='Magic Item'][@id='{adorner_id}']")
         # set up name
         name_format = self.read_setter(adorner, "name-format")
+        if name_format is None:
+            name_format = adorner.attrib.get("name", "Unnamed")
         name_format = re.sub(r"{{parent}}", item.name, name_format)
         # print(re.search())
         name_format = re.sub(r"{{([a-z \-]*)}}", lambda m: self.read_setter(adorner, m.group(1)), name_format)
