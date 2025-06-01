@@ -69,7 +69,7 @@ try:
     session.port = port
     if SPLASH:
         pyi_splash.close()
-    ui.run(favicon=svg, reload=True, port=port, native=True, reconnect_timeout=10)
+    ui.run(favicon=svg, reload=False, port=port, native=True, reconnect_timeout=10)
 except Exception as Argument:
     # creating/opening a file
     f = open("errorlog.txt", "a")
