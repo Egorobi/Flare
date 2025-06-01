@@ -42,7 +42,7 @@ You can also customize the frames from one of the packaged sets, or design your 
 # :memo: How to Use
 Flare requires Aurora to be installed to work.
 
-Use the installer for the latest release, or download the executable if you want to set up the app manually.
+Navigate to the releases and use the latest installer to set up Flare.
 
 After installing and opening Flare for the first time, navigate to the Settings and set the Content Directory to point to the folder where Aurora stores content files. In most cases this will be the "custom" subfolder of "5e Character Builder".
 
