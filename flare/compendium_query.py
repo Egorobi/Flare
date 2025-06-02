@@ -359,9 +359,15 @@ class CompendiumQuery:
         alignment = self.read_setter(companion, "alignment")
         challenge = self.read_setter(companion, "challenge")
         traits = self.read_setter(companion, "traits")
-        traits = traits.split(",")
+        if traits is None:
+            traits = []
+        else:
+            traits = traits.split(",")
         actions = self.read_setter(companion, "actions")
-        actions = actions.split(",")
+        if actions is None:
+            actions = []
+        else:
+            actions = actions.split(",")
         traits, actions = self.query_companion_features_batch(traits, actions)
         return Companion(companion.attrib["name"],
                          name=name,

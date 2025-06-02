@@ -439,8 +439,8 @@ class Query:
     def check_equipped(self, equipped, requirement):
         requirement = self.translate_operators(requirement)
         # armor type check
-        # TODO: dont count shield as armor?
-        requirement = re.sub(r"\[armor:none\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor)]) == 0), requirement)
+        # NOTE: not counting shield as armor for requirements
+        requirement = re.sub(r"\[armor:none\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor) and i.armor_type.lower() == "shield"]) == 0), requirement)
         requirement = re.sub(r"\[armor:any\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor)]) > 0), requirement)
         requirement = re.sub(r"\[armor:([a-z- ]*)\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor) and i.armor_type.lower() == m.group(1).lower()]) > 0), requirement)
         # shield check TODO improve
@@ -901,14 +901,15 @@ class Query:
         return [weapon_profs, armor_profs, tool_profs, other_profs, languages]
 
     def query_companions(self):
-        companions = self.find_character_elements("./build/sum/element[@type='Companion']")
+        # NOTE: supports multiple companions, companion variables will likely break but seem to be unused
+        companions = self.find_character_elements("./build/elements//element[@type='Companion']")
         companion_list = []
         for c in companions:
-            companion_list.append(self.compendium.query_companion(c.attrib["id"]))
+            companion_list.append(self.compendium.query_companion(c.attrib["registered"]))
         return companion_list
 
     def query_companion(self):
-        # NOTE: only 1 companion is currently supported
+        # NOTE: only supports 1 companion
         companion = self.find_character_element("./build/sum/element[@type='Companion']")
         if companion is None:
             return None
