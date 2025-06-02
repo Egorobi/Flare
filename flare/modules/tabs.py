@@ -963,7 +963,10 @@ class FeatureCharges(ChargeListener):
 
     def show_module(self):
         usage = self.feature.usage.split("/")
-        max_uses = int(usage[0])
+        numerical_usage = re.search(r"\d+", usage[0])
+        if numerical_usage is None:
+            return
+        max_uses = int(numerical_usage.group())
         self.max_uses = max_uses
         recharge = usage[1]
 
