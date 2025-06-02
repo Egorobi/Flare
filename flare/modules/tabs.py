@@ -124,7 +124,7 @@ class Tabs(Module):
                             context_menu = RollContext()
                             context_menu.show_module(attack_bonus)
                     if re.match(r"\d+d\d+[-\+]\d+", attack.damage):
-                        m = re.search(r"(\d+)d(\d+)([-\+])(\d+) (.*)", attack.damage)
+                        m = re.search(r"(\d+)d(\d+)([-\+])(\d+) (\w*)", attack.damage)
                         num = int(m.group(1))
                         die = int(m.group(2))
                         mod = int(m.group(4))
@@ -134,7 +134,8 @@ class Tabs(Module):
                         damage_only = f"{num}d{die}{plus}{mod}"
                         with ui.button(damage_only, on_click=lambda num=num, die=die, mod=mod*polarity: session.roll_dialog.wait_module([(num, die, mod)])).classes(
                                 "q-px-sm font-normal q-py-xs outline-btn col-2").props("dense no-caps unelevated outline"):
-                            ui.html(icons.damage_type_map[damage_type]).classes("q-pl-xs adaptcolor")
+                            if damage_type in icons.damage_type_map:
+                                ui.html(icons.damage_type_map[damage_type]).classes("q-pl-xs adaptcolor")
                             ui.tooltip(damage_type.capitalize()).classes("adapttooltip")
                     else:
                         ui.label(attack.damage).classes("col-2")

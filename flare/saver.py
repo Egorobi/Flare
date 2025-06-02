@@ -2,6 +2,7 @@ import glob
 import os
 import json
 from lxml import etree as et
+import re
 
 class Saver():
 
@@ -20,7 +21,7 @@ class Saver():
         tree.write(filename, pretty_print=True)
 
     def save_character_file_path(self, name, aurora_file_path):
-        filename = self.find_save_file(name)
+        filename = self.find_save_file(name, aurora_file_path)
         tree = et.parse(filename, self.parser)
         root = tree.getroot()
         root.find("./aurora").text = aurora_file_path
@@ -151,7 +152,7 @@ class Saver():
         tree = et.parse(file)
         print(tree)
 
-    def find_save_file(self, name):
+    def find_save_file(self, name, aurora=None):
         for filename in glob.iglob(self.save_directory + '**/*.xml', recursive=True):
             if not filename.endswith('.xml'):
                 continue
@@ -160,7 +161,10 @@ class Saver():
             if root.attrib["name"] == name:
                 return filename
         # if file not found
-        filename = self.save_directory + name + ".xml"
+        if aurora is None:
+            filename = f"{self.save_directory}{name}.xml"
+        else:
+            filename = f"{self.save_directory}{re.split(r"[/\\]+", aurora)[-1].split(".")[0]}.xml"
         root = et.Element('character')
         root.attrib["name"] = name
         _ = et.SubElement(root, 'pdf')

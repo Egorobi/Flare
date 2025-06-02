@@ -19,8 +19,16 @@ class CompendiumQuery:
         for filename in list(glob.iglob(self.source_path + '**/*.xml', recursive=True)) + ["./data/elements/internal_elements.xml"]:
             if not filename.endswith('.xml'):
                 continue
-            tree = et.parse(filename)
-            for element in tree.getroot().iter():
+            try:
+                tree = et.parse(filename)
+                root = tree.getroot()
+            except et.XMLSyntaxError:
+                print(f"File {filename} has xml syntax error, attempting to force UTF-8")
+                with open(filename, 'r', encoding="utf-8") as f:
+                    xml_text = f.read()
+                xml_text = re.sub(r'<\?xml[^>]*encoding=["\'].*?["\']', '<?xml version="1.0"', xml_text)
+                root = et.fromstring(xml_text)
+            for element in root.iter():
                 if not "id" in element.attrib or element.tag != "element":
                     continue
                 compendium[element.attrib["id"]] = element
@@ -89,72 +97,122 @@ class CompendiumQuery:
         # this will break something in the future for sure
 
         spell_id = spell.attrib["id"]
-        for filename in glob.iglob(self.source_path + '**/*.xml', recursive=True):
-            if not filename.endswith('.xml'):
-                continue
-            tree = et.parse(filename)
-            root = tree.getroot()
+        entry = self.find_element(element_id=spell_id)
 
-            entry = root.find(f".//element[@type='Spell'][@id='{spell_id}']")
-            if entry is None:
-                continue
+        components = (self.read_setter(entry, "hasVerbalComponent"), self.read_setter(entry, "hasSomaticComponent"), self.read_setter(entry, "hasMaterialComponent"))
 
-            components = (self.read_setter(entry, "hasVerbalComponent"), self.read_setter(entry, "hasSomaticComponent"), self.read_setter(entry, "hasMaterialComponent"))
+        supports = entry.find("supports")
+        spell_type = None
+        if supports is not None:
+            supports = supports.text.split(", ")
+            if "Spell Saving Throw" in supports:
+                spell_type = "save"
+            elif "Spell Attack" in supports:
+                spell_type = "attack"
+            else:
+                spell_type = None
 
-            supports = entry.find("supports")
-            spell_type = None
-            if supports is not None:
-                supports = supports.text.split(", ")
-                if "Spell Saving Throw" in supports:
-                    spell_type = "save"
-                elif "Spell Attack" in supports:
-                    spell_type = "attack"
-                else:
-                    spell_type = None
+        description = et.tostring(entry.find("./description"), method='xml',with_tail=False).decode('UTF-8')
 
-            description = et.tostring(entry.find("./description"), method='xml',with_tail=False).decode('UTF-8')
+        save_type = None
+        if spell_type == "save":
+            save = re.search("(Intelligence|Wisdom|Charisma|Strength|Dexterity|Constitution) saving throw", description)
+            if save is not None:
+                save_type = save.group(1)[:3].upper()
 
-            save_type = None
-            if spell_type == "save":
-                save = re.search("(Intelligence|Wisdom|Charisma|Strength|Dexterity|Constitution) saving throw", description)
-                if save is not None:
-                    save_type = save.group(1)[:3].upper()
+        spell_wrapped = Spell(spell_id,
+                            entry.attrib["name"],
+                            self.read_setter(entry, "level"),
+                            self.read_setter(entry, "school"),
+                            self.read_setter(entry, "time"),
+                            self.read_setter(entry, "isRitual"),
+                            self.read_setter(entry, "duration"),
+                            self.read_setter(entry, "isConcentration"),
+                            self.read_setter(entry, "range"),
+                            deepcopy(components),
+                            self.read_setter(entry, "materialComponent") if self.read_setter(entry, "hasMaterialComponent") == "true" else None,
+                            description,
+                            spell.attrib.get("source") if source is None else source,
+                            self.read_setter(entry, "keywords"),
+                            spell_type = spell_type,
+                            save_type=save_type)
+        return spell_wrapped
+        # for filename in glob.iglob(self.source_path + '**/*.xml', recursive=True):
+        #     if not filename.endswith('.xml'):
+        #         continue
+        #     tree = et.parse(filename)
+        #     root = tree.getroot()
 
-            spell_wrapped = Spell(spell_id,
-                                entry.attrib["name"],
-                                self.read_setter(entry, "level"),
-                                self.read_setter(entry, "school"),
-                                self.read_setter(entry, "time"),
-                                self.read_setter(entry, "isRitual"),
-                                self.read_setter(entry, "duration"),
-                                self.read_setter(entry, "isConcentration"),
-                                self.read_setter(entry, "range"),
-                                deepcopy(components),
-                                self.read_setter(entry, "materialComponent") if self.read_setter(entry, "hasMaterialComponent") == "true" else None,
-                                description,
-                                spell.attrib.get("source") if source is None else source,
-                                self.read_setter(entry, "keywords"),
-                                spell_type = spell_type,
-                                save_type=save_type)
-            # print(self.readSetter(spell, "keywords"))
-            return spell_wrapped
+        #     entry = root.find(f".//element[@type='Spell'][@id='{spell_id}']")
+        #     if entry is None:
+        #         continue
+
+        #     components = (self.read_setter(entry, "hasVerbalComponent"), self.read_setter(entry, "hasSomaticComponent"), self.read_setter(entry, "hasMaterialComponent"))
+
+        #     supports = entry.find("supports")
+        #     spell_type = None
+        #     if supports is not None:
+        #         supports = supports.text.split(", ")
+        #         if "Spell Saving Throw" in supports:
+        #             spell_type = "save"
+        #         elif "Spell Attack" in supports:
+        #             spell_type = "attack"
+        #         else:
+        #             spell_type = None
+
+        #     description = et.tostring(entry.find("./description"), method='xml',with_tail=False).decode('UTF-8')
+
+        #     save_type = None
+        #     if spell_type == "save":
+        #         save = re.search("(Intelligence|Wisdom|Charisma|Strength|Dexterity|Constitution) saving throw", description)
+        #         if save is not None:
+        #             save_type = save.group(1)[:3].upper()
+
+        #     spell_wrapped = Spell(spell_id,
+        #                         entry.attrib["name"],
+        #                         self.read_setter(entry, "level"),
+        #                         self.read_setter(entry, "school"),
+        #                         self.read_setter(entry, "time"),
+        #                         self.read_setter(entry, "isRitual"),
+        #                         self.read_setter(entry, "duration"),
+        #                         self.read_setter(entry, "isConcentration"),
+        #                         self.read_setter(entry, "range"),
+        #                         deepcopy(components),
+        #                         self.read_setter(entry, "materialComponent") if self.read_setter(entry, "hasMaterialComponent") == "true" else None,
+        #                         description,
+        #                         spell.attrib.get("source") if source is None else source,
+        #                         self.read_setter(entry, "keywords"),
+        #                         spell_type = spell_type,
+        #                         save_type=save_type)
+        #     # print(self.readSetter(spell, "keywords"))
+        #     return spell_wrapped
 
     def query_item(self, item_id):
-        for filename in glob.iglob(self.source_path + '**/*.xml', recursive=True):
-            if not filename.endswith('.xml'):
-                continue
-            tree = et.parse(filename)
-            root = tree.getroot()
-            # NOTE this structure might not always hold
-            item  = root.find(f"./element[@id='{item_id}']")
-            if item is None:
-                continue
-            if item.attrib["type"] == "Weapon":
-                return self.process_weapon(item)
-            elif item.attrib["type"] == "Armor":
-                return self.process_armor(item)
-            else:
-                return self.process_item(item)
+        # for filename in glob.iglob(self.source_path + '**/*.xml', recursive=True):
+        #     if not filename.endswith('.xml'):
+        #         continue
+        #     tree = et.parse(filename)
+        #     root = tree.getroot()
+        #     # NOTE this structure might not always hold
+        #     item  = root.find(f"./element[@id='{item_id}']")
+        #     if item is None:
+        #         continue
+        #     if item.attrib["type"] == "Weapon":
+        #         return self.process_weapon(item)
+        #     elif item.attrib["type"] == "Armor":
+        #         return self.process_armor(item)
+        #     else:
+        #         return self.process_item(item)
+        item = self.find_element(element_id=item_id)
+        if item is None:
+            return
+        if item.attrib["type"] == "Weapon":
+            return self.process_weapon(item)
+        elif item.attrib["type"] == "Armor":
+            return self.process_armor(item)
+        else:
+            return self.process_item(item)
+
 
     def query_item_batch(self, ids):
         if len(ids) == 0:

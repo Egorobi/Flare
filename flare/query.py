@@ -790,8 +790,10 @@ class Query:
         for a in appearance:
             entry = self.find_character_element("./build/appearance/"+a)
             characteristics[a] = entry.text if entry is not None else ""
-        size = self.find_character_element("./build/sum/element[@type='Size']").attrib.get("id", "")
-        size = size.split("_")[-1].capitalize()
+        size = self.find_character_element("./build/sum/element[@type='Size']")
+        if size is not None:
+            size = size.attrib.get("id", "")
+            size = size.split("_")[-1].capitalize()
         characteristics["size"] = size
         return characteristics
 
