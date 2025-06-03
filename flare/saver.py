@@ -126,6 +126,14 @@ class Saver():
     def get_frame_style(self):
         return self.get_setting("frames", "flare")
 
+    def get_version_reminder(self):
+        return self.get_setting("versionReminder", "0.0.1")
+
+    def save_version_reminder(self, reminder: str):
+        settings = self.get_global_settings()
+        settings["versionReminder"] = reminder
+        self.write_global_settings(settings)
+
     ### CUSTOM
 
     def write_custom_colors(self, colors):

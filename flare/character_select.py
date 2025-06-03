@@ -2,6 +2,8 @@ import tkinter.filedialog as fd
 from tkinter import Tk
 import urllib.parse
 import os
+import requests
+from packaging.version import Version
 from nicegui import ui, run
 from modules.head_module import HeadModule
 from modules.loader import LoadingDialog
@@ -56,6 +58,8 @@ class SelectPage():
 
         # version label
         ui.label(f"Version {VERSION}").classes("text-slate-400 opacity-50 absolute-bottom-right q-pa-xs")
+
+        self.check_for_update()
 
     def open_character_button(self, name):
         # ui.navigate.to("/character_sheet/"+urllib.parse.quote(name))
@@ -152,3 +156,30 @@ class SelectPage():
         file = save["file"]
         os.remove(file)
         ui.navigate.to("/character_select")
+
+    def check_for_update(self):
+        if Version(self.saver.get_version_reminder()) >= Version(VERSION):
+            # update reminder disabled for this version
+            return
+        # get latest release version
+        response = requests.get("https://api.github.com/repos/Egorobi/Flare/releases/latest", timeout=5)
+        if response.raise_for_status() is not None:
+            # response error
+            return
+        latest_version = Version(response.json()["tag_name"])
+
+        if latest_version > Version(VERSION):
+            # new update is available
+            with ui.dialog().classes("dicedialog") as dialog, ui.card().classes("transparent no-shadow frameborder frame items-center"):
+                ui.label("A newer version of Flare is available").classes("font-bold")
+                ui.label(f"Version {response.json()["name"]}")
+                ui.checkbox("Don't remind me about updates", on_change=lambda e: self.set_version_reminder(e.value))
+                with ui.row():
+                    ui.button("Open New Release", on_click=lambda: ui.navigate.to("https://github.com/Egorobi/Flare/releases/latest", new_tab=True)).props("outline")
+                    ui.button("Cancel", on_click=lambda: dialog.close()).props("outline")
+            dialog.open()
+
+    async def set_version_reminder(self, value):
+        # the current version is saved in the reminder so that when the application updates reminders are re-enabled
+        if value:
+            self.saver.save_version_reminder(Version(VERSION).base_version)

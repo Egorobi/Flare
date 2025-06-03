@@ -1,12 +1,14 @@
 import os
 import tkinter.filedialog as fd
 from tkinter import Tk
+from packaging.version import Version
 from modules.head_module import HeadModule
 from modules.loader import LoadingDialog
 from nicegui import ui, run
 from saver import Saver
 from colorschemes import color_schemes
 import session
+from version import VERSION
 
 class Settings():
 
@@ -105,11 +107,16 @@ class Settings():
                             ui.label(f.capitalize())
                     self.update_frame_select(self.saver.get_frame_style())
                 
+                ui.label("Update Reminders").classes("font-bold text-primary text-xl")
+                ui.checkbox("Remind me about new Flare releases", on_change=lambda e: self.set_version_reminder(e.value))
+
+                ui.label("Miscellaneous").classes("font-bold text-primary text-xl")
+                
                 with ui.row().classes("items-center"):
                     ui.label("App running on: ").classes("text-slate-400")
                     ui.code(f"http://localhost:{session.port}")
 
-                ui.button("Report a Problem", on_click=lambda: ui.navigate.to('https://github.com/Egorobi/Flare')).props("outline")
+                ui.button("Report a Problem", on_click=lambda: ui.navigate.to('https://github.com/Egorobi/Flare', new_tab=True)).props("outline")
 
     def go_back(self):
         loading = LoadingDialog()
@@ -165,3 +172,10 @@ class Settings():
         self.content_label.set_text(directory + "/")
 
         self.saver.save_global_content(directory + "/")
+
+    async def set_version_reminder(self, value):
+        # the current version is saved in the reminder so that when the application updates reminders are re-enabled
+        if value:
+            self.saver.save_version_reminder("0.0.1")
+        else:
+            self.saver.save_version_reminder(Version(VERSION).base_version)
