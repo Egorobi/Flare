@@ -164,25 +164,25 @@ class Query:
         ids = []
         for element in self.find_character_elements("./build/sum/element[@type='Racial Trait']"):
             ids.append(element.attrib["id"])
-        return self.wrap_features(ids, "[@type='Racial Trait']")
+        return self.wrap_features(ids)
 
     def get_class_features(self):
         ids = []
         for element in self.find_character_elements("./build/sum/element[@type='Class Feature']") + self.find_character_elements(".//sum/element[@type='Archetype Feature']") + self.find_character_elements(".//sum/element[@type='Archetype']"):
             ids.append(element.attrib["id"])
-        return self.wrap_features(ids, "[@type='Class Feature' or @type='Archetype Feature' or @type='Archetype']")
+        return self.wrap_features(ids)
 
     def get_feats(self):
         ids = []
         for element in self.find_character_elements("./build/sum/element[@type='Feat']") + self.find_character_elements(".//sum/element[@type='Feat Feature']"):
             ids.append(element.attrib["id"])
-        return self.wrap_features(ids, "[@type='Feat' or @type='Feat Feature']")
+        return self.wrap_features(ids)
 
-    def wrap_features(self, ids, typequery):
+    def wrap_features(self, ids):
         if len(ids) == 0:
             return [], {}
         features = []
-        wrapped = self.compendium.query_features_batch(ids, typequery)
+        wrapped = self.compendium.query_features_batch(ids)
         child_dict = {}
         for feature in wrapped:
             children = self.get_children_features(feature.feature_id)
@@ -395,6 +395,10 @@ class Query:
             # used for string values, always overrides previous value
             self.variables[name] = stat.attrib["value"]
             return
+        else:
+            # if not inline and current value is string (previously inline), must be reset to 0 as int
+            if isinstance(self.variables[name], str):
+                self.variables[name] = 0
         value = self.get_variable_value(stat.attrib["value"])
         # stat maximum
         if "maximum" in stat.attrib:
@@ -584,10 +588,10 @@ class Query:
     def compute_variables(self):
         elements = self.find_character_elements("./build/sum/element")
         all_ids = []
-        id_string = "["
+        # id_string = "["
         proficiencies = []
         for element in elements:
-            id_string += f"@id='{element.attrib["id"]}' or "
+            # id_string += f"@id='{element.attrib["id"]}' or "
             all_ids.append(element.attrib["id"])
             if element.attrib["type"] == "Proficiency":
                 proficiencies.append(element.attrib["id"])
@@ -596,13 +600,13 @@ class Query:
         self.set_basic_variables()
         self.all_ids = all_ids
 
-        if len(id_string) > 1:
-            id_string = id_string[:-4]
-        id_string += "]"
-        query = ".//element" + id_string
+        # if len(id_string) > 1:
+        #     id_string = id_string[:-4]
+        # id_string += "]"
+        # query = ".//element" + id_string
         real_elements = []
         # unsorted list of elements in compendium
-        for real_element in self.compendium.find_all_elements(query):
+        for real_element in self.compendium.find_all_elements(element_ids=all_ids):
             real_elements.append(real_element)
         # sort elements from compendium
         sorted_elements = []
@@ -658,7 +662,8 @@ class Query:
         self.compute_stat(stat, contributor)
 
     def process_element(self, element_id):
-        element = self.compendium.find_element(f"[@id='{element_id}']")
+        # element = self.compendium.find_element(f"[@id='{element_id}']")
+        element = self.compendium.find_element(element_id=element_id)
         if element is not None:
             for stat in element.findall("./rules/stat"):
                 self.process_stat(stat, stat.attrib.get("alt", element.attrib.get("name", "unknown")))
@@ -765,8 +770,8 @@ class Query:
         bonds = self.find_character_element("./build/input/background-bonds").text
         flaws = self.find_character_element("./build/input/background-flaws").text
         feature_name = self.find_character_element("./build/input/background/feature").attrib["name"]
-        feature_name = self.find_character_element("./build/input/background/feature/description").text
-        return Background(name, trinket, traits, ideals, bonds, flaws, feature_name, feature_name)
+        feature_description = self.find_character_element("./build/input/background/feature/description").text
+        return Background(name, trinket, traits, ideals, bonds, flaws, feature_name, feature_description)
 
     def query_characteristics(self):
         characteristics = {}
@@ -907,7 +912,9 @@ class Query:
         companions = self.find_character_elements("./build/elements//element[@type='Companion']")
         companion_list = []
         for c in companions:
-            companion_list.append(self.compendium.query_companion(c.attrib["registered"]))
+            companion = self.compendium.query_companion(c.attrib["registered"])
+            if companion is not None:
+                companion_list.append(companion)
         return companion_list
 
     def query_companion(self):

@@ -78,8 +78,16 @@ class CompendiumQuery:
         #     if len(element) > 0:
         #         return element[0]
 
-    def find_all_elements(self, query):
-        return self.quick_query_parse(query)
+    def find_all_elements(self, query=None, element_ids=None):
+        if query is not None:
+            return self.quick_query_parse(query)
+        else:
+            elements = []
+            for eid in element_ids:
+                element = self.find_element(element_id=eid)
+                if element is not None:
+                    elements.append(element)
+            return elements
         # elements = []
         # for filename in glob.iglob(self.source_path + '**/*.xml', recursive=True):
         #     if not filename.endswith('.xml'): continue
@@ -217,11 +225,12 @@ class CompendiumQuery:
     def query_item_batch(self, ids):
         if len(ids) == 0:
             return []
-        id_string = "["
-        id_string += " or ".join(f"@id='{i}'" for i in ids)
-        id_string += "]"
-        query = ".//element" + id_string
-        return self.find_all_elements(query)
+        # id_string = "["
+        # id_string += " or ".join(f"@id='{i}'" for i in ids)
+        # id_string += "]"
+        # query = ".//element" + id_string
+        # return self.find_all_elements(query)
+        return self.find_all_elements(element_ids=ids)
 
     def wrap_item(self, item):
         if item.attrib["type"] == "Weapon":
@@ -232,7 +241,8 @@ class CompendiumQuery:
             return self.process_item(item)
 
     def process_magic_item(self, item, adorner_id):
-        adorner = self.find_element(f".//element[@type='Magic Item'][@id='{adorner_id}']")
+        # adorner = self.find_element(f".//element[@type='Magic Item'][@id='{adorner_id}']")
+        adorner = self.find_element(element_id=adorner_id)
         # set up name
         name_format = self.read_setter(adorner, "name-format")
         if name_format is None:
@@ -346,55 +356,63 @@ class CompendiumQuery:
         return Feature(feature_id, name, description, sheet_description, usage, action, display)
 
     def query_racial_trait(self, trait_id):
-        trait = self.find_element(f".//element[@id='{trait_id}'][@type='Racial Trait']")
+        # trait = self.find_element(f".//element[@id='{trait_id}'][@type='Racial Trait']")
+        trait = self.find_element(element_id=trait_id)
         # print(trait.attrib["name"])
         return self.format_feature(trait)
 
     def query_class_feature(self, feature_id):
         if "ID_INTERNAL_CLASS" in feature_id:
             return None
-        feature = self.find_element(f".//element[@id='{feature_id}'][@type='Class Feature' or @type='Archetype Feature' or @type='Archetype']")
+        # feature = self.find_element(f".//element[@id='{feature_id}'][@type='Class Feature' or @type='Archetype Feature' or @type='Archetype']")
+        feature = self.find_element(element_id=feature_id)
         return self.format_feature(feature)
 
     def query_class_features_batch(self, ids):
-        id_string = "["
-        id_string += " or ".join(f"@id='{i}'" for i in ids)
-        id_string += "]"
-        query = ".//element" + id_string + "[@type='Class Feature' or @type='Archetype Feature' or @type='Archetype']"
+        # id_string = "["
+        # id_string += " or ".join(f"@id='{i}'" for i in ids)
+        # id_string += "]"
+        # query = ".//element" + id_string + "[@type='Class Feature' or @type='Archetype Feature' or @type='Archetype']"
         features = []
-        for feature in self.find_all_elements(query):
+        for feature in self.find_all_elements(element_ids=ids):
             if feature is not None:
                 features.append(self.format_feature(feature))
         return features
 
-    def query_features_batch(self, ids, typequery):
-        id_string = "["
-        id_string += " or ".join(f"@id='{i}'" for i in ids)
-        id_string += "]"
-        query = ".//element" + id_string + typequery
+    def query_features_batch(self, ids):
+        # id_string = "["
+        # id_string += " or ".join(f"@id='{i}'" for i in ids)
+        # id_string += "]"
+        # query = ".//element" + id_string + typequery
         features = []
-        for feature in self.find_all_elements(query):
+        for feature in self.find_all_elements(element_ids=ids):
             if feature is not None:
                 features.append(self.format_feature(feature))
         return features
 
     def query_feat(self, feat_id):
-        feat = self.find_element(f".//element[@id='{feat_id}'][@type='Feat' or @type='Feat Feature']")
+        # feat = self.find_element(f".//element[@id='{feat_id}'][@type='Feat' or @type='Feat Feature']")
+        feat = self.find_element(element_id=feat_id)
         return self.format_feature(feat)
 
     def query_class(self, class_id):
-        class_info = self.find_element(f".//element[@type='Class'][@id='{class_id}']")
+        # class_info = self.find_element(f".//element[@type='Class'][@id='{class_id}']")
+        class_info = self.find_element(element_id=class_id)
         hitdice = int(self.read_setter(class_info, "hd")[1:])
         name = class_info.attrib["name"]
         return CharacterClass(class_id, name, hitdice)
 
     def query_deity(self, deity_id):
-        deity = self.find_element(f"./element[@id='{deity_id}']")
+        # deity = self.find_element(f"./element[@id='{deity_id}']")
+        deity = self.find_element(element_id=deity_id)
         return deity.attrib.get("name", None)
 
     def query_companion(self, companion_id):
         # NOTE: currently not using the companion variables (not sure if they are needed)
-        companion = self.find_element(f"./element[@type='Companion' and @id='{companion_id}']")
+        # companion = self.find_element(f"./element[@type='Companion' and @id='{companion_id}']")
+        companion = self.find_element(element_id=companion_id)
+        if companion is None:
+            return None
         name = companion.attrib["name"]
         if companion.find("./description") is not None:
             description = et.tostring(companion.find("./description"), method='xml',with_tail=False).decode('UTF-8')
@@ -446,14 +464,14 @@ class CompendiumQuery:
                          traits=traits,
                          actions=actions)
 
-    def query_companion_features_batch(self, traits, actions):
-        id_string = "["
-        id_string += " or ".join(f"@id='{i}'" for i in traits+actions)
-        id_string += "]"
-        query = ".//element" + id_string + "[@type='Companion Trait' or @type='Companion Action']"
+    def query_companion_features_batch(self, trait_ids, action_ids):
+        # id_string = "["
+        # id_string += " or ".join(f"@id='{i}'" for i in traits+actions)
+        # id_string += "]"
+        # query = ".//element" + id_string + "[@type='Companion Trait' or @type='Companion Action']"
         traits = []
         actions = []
-        for feature in self.find_all_elements(query):
+        for feature in self.find_all_elements(element_ids=trait_ids+action_ids):
             if feature is not None:
                 feature_wrapped = self.wrap_companion_feature(feature)
                 if feature.attrib["type"] == "Companion Trait":
