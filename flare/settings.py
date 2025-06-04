@@ -108,7 +108,7 @@ class Settings():
                     self.update_frame_select(self.saver.get_frame_style())
                 
                 ui.label("Update Reminders").classes("font-bold text-primary text-xl")
-                ui.checkbox("Remind me about new Flare releases", on_change=lambda e: self.set_version_reminder(e.value))
+                ui.checkbox("Remind me about new Flare releases", value=Version(self.saver.get_version_reminder()) < Version(VERSION), on_change=lambda e: self.set_version_reminder(e.value))
 
                 ui.label("Miscellaneous").classes("font-bold text-primary text-xl")
                 
