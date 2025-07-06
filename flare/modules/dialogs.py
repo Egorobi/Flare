@@ -156,7 +156,7 @@ class RollDiceDialog(Module):
                 ui.label(str(roll)).classes("font-bold absolute-center").style(f"font-size: {font_size}rem; color: {color};")
 
     async def roll_from_formula(self, roll_formula):
-        dice_matches = re.findall("(\d+)d(\d+)", roll_formula)
+        dice_matches = re.findall(r"(\d+)d(\d+)", roll_formula)
         if len(dice_matches) < 1:
             print("No dice to roll")
             return
@@ -188,7 +188,7 @@ class RollDiceDialog(Module):
             return
         dice_count = 0
         if re.search(r"adv", roll_formula) or re.search(r"dis", roll_formula):
-            dice_matches = [dice_matches[0], dice_matches[0]]
+            dice_matches = [(1, dice_matches[0][1], 0), (1, dice_matches[0][1], 0)]
         for match in dice_matches:
             for _ in range(int(match[0])):
                 roll = values[dice_count] if values is not None else " "
