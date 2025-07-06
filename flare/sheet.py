@@ -8,6 +8,7 @@ from modules.tabs import Tabs
 from modules.dice_roller import DiceRoller
 from modules.loader import LoadingDialog
 from modules.help_screen import HelpScreen
+from modules.roll_log import RollLog
 from editors.editor import Editor
 from editors.inventory import InventoryManager
 from editors.notes import NotesManager
@@ -126,11 +127,14 @@ class Sheet():
         with ui.row().classes("w-full justify-center"):
             ui.button("Return to Home", on_click=lambda: ui.navigate.to("/character_select")).props("outline")
 
+        # Roll log
+        self.roll_log = RollLog()
+        with ui.page_sticky(x_offset=18, y_offset=18):
+            ui.button(icon='history', on_click=lambda: self.roll_log.show_module()).props('fab color=primary outline size=md')
         # Help button
         help_screen = HelpScreen()
-        with ui.page_sticky(x_offset=18, y_offset=18):
-            ui.button(icon='question_mark', on_click=lambda: help_screen.show_module()) \
-                .props('fab color=primary outline size=md')
+        with ui.page_sticky(x_offset=18, y_offset=80):
+            ui.button(icon='question_mark', on_click=lambda: help_screen.show_module()).props('fab color=primary outline padding=sm')
 
     async def handle_key(self, e: KeyEventArguments):
         # print(e.key.name)
@@ -142,6 +146,8 @@ class Sheet():
         elif e.key.name == "r" and e.action.keydown:
             # try to roll selected dice
             await self.roll_selected()
+        elif e.key.name == "h" and e.action.keydown:
+            self.roll_log.show_module()
 
     async def roll_selected(self):
         selection = await ui.run_javascript("""

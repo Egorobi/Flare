@@ -12,6 +12,9 @@ Right click any skill, saving throw, or attack modifier to roll it with advantag
 ##### Reroll
 After rolling a custom set of dice through the dice roller, reroll the same set by opening the dice selection and clicking the reroll icon that has replaced the checkmark.
 
+##### Roll History
+Press H to open the roll history log.
+
 ##### Quick Roll
 Select any text in the (count)d(dice) format and press R to roll those dice.
 

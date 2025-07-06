@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Flare"
-#define MyAppVersion "1.0.3"
+#define MyAppVersion "1.1.0a1"
 #define MyAppPublisher "Egorobi"
 #define MyAppExeName "Flare.exe"
 

@@ -71,6 +71,7 @@ class RollDiceDialog(Module):
             if advantage is not None:
                 result = 0
                 if len(rolls) == 1:
+                    # in advantage mode only a single die is used
                     roll = rolls[0]
                     two_rolls = (random.randint(1, roll[1]),random.randint(1, roll[1]))
                     highlight = 0
@@ -102,6 +103,7 @@ class RollDiceDialog(Module):
                             else:
                                 with ui.card().classes("transparent no-shadow"):
                                     self.show_die(two_rolls[i], roll[1])
+                    session.char.add_roll_history(self.roll_to_formula(rolls) + f" {advantage[0:3]}", result+roll[2], values=two_rolls)
                     ui.label(f"= {result+roll[2]}").classes("text-xl font-bold")
             else:
                 result = 0
@@ -114,7 +116,7 @@ class RollDiceDialog(Module):
                 total_mod = sum([r[2] for r in rolls])
                 message = f"Rolled {all_dice} {session.val_to_string(total_mod)}"
                 ui.label(message)
-                with ui.row().classes("items-center w-full justify-center"):
+                with ui.row().classes("items-center w-full justify-center q-pa-md").style("gap: 3rem;"):
                     # dice = [20, 12, 100, 10, 8, 6, 4]
                     count = 0
                     for i, roll in enumerate(rolls):
@@ -122,33 +124,77 @@ class RollDiceDialog(Module):
                             self.show_die(all_rolls[count], roll[1])
                             count += 1
                 ui.label(f"= {result+total_mod}").classes("text-xl font-bold")
+                session.char.add_roll_history(self.roll_to_formula(rolls), result+total_mod, values=all_rolls)
             ui.card().classes("absolute-center w-full h-full frameborder frame no-shadow transparent")
 
-
+            session.update_roll_listeners()
+            
             dialog.open()
 
-    def show_die(self, roll, die):
+    def show_die(self, roll, die, size=10):
         f = open(f"data/assets/d{die}.svg")
         svg = f.read()
         # svg = re.sub("fill:none","fill:#000000",svg)
         # svg = re.sub("stroke:#FFC360","stroke:#808080",svg)
         # svg = re.sub("fill:none","fill:none",svg)
         svg = re.sub("stroke:#FFC360",f"stroke:{session.color_scheme[0]}",svg)
-        svg = re.sub("<svg", "<svg class='size-10'", svg)
-        with ui.card().classes("no-shadow transparent"):
+        svg = re.sub("<svg", f"<svg class='size-{size}'", svg)
+        font_size = 1.5 * (size/10)
+        with ui.card().classes("no-shadow transparent q-pa-none"):
             ui.html(svg).classes("absolute-center")
-            color = "white"
-            if roll == 1:
+            color = "var(--q-adaptcolor)"
+            if int(roll) == 1:
                 color = "#C73032"
             elif roll == die:
                 color = "#d4af37"
             if die == 100:
                 # ui.label(str(roll)).classes("text-xl mix-blend-difference absolute-center").style("color: {};".format(color))
                 # ui.label(str(roll)).classes("text-xl absolute-center").style("color: {}; background-color: rgba(0, 0, 0, 0.3); border-radius: 5px;".format(color))
-                ui.label(str(roll)).classes("text-xl absolute-center").style(f"color: {color}; backdrop-filter: blur(3px); border-radius: 5px;")
+                ui.label(str(roll)).classes("absolute-center").style(f"font-size: {font_size}rem; color: {color}; backdrop-filter: blur(3px); border-radius: 5px;")
                 # ui.label(str(roll)).classes("text-xl absolute-center").style("color: {}; border-radius: 5px;".format(color))
             else:
-                ui.label(str(roll)).classes("text-xl font-bold absolute-center").style(f"color: {color};")
+                ui.label(str(roll)).classes("font-bold absolute-center").style(f"font-size: {font_size}rem; color: {color};")
+
+    async def roll_from_formula(self, roll_formula):
+        dice_matches = re.findall("(\d+)d(\d+)", roll_formula)
+        if len(dice_matches) < 1:
+            print("No dice to roll")
+            return
+        fixed_pluses = re.findall(r"(?<!\S)\+?\d+(?!\S)", roll_formula)
+        fixed_minuses = re.findall(r"(?<!\S)\-\d+(?!\S)", roll_formula)
+        sum_fixed = sum([int(match) for match in fixed_pluses+fixed_minuses])
+        roll_instructions = [(int(match[0]), int(match[1]), 0) for match in dice_matches]
+        roll_instructions[0] = (roll_instructions[0][0], roll_instructions[0][1], sum_fixed)
+        if re.search(r"adv", roll_formula):
+            await self.wait_module(roll_instructions, "advantage")
+        elif re.search(r"dis", roll_formula):
+            await self.wait_module(roll_instructions, "disadvantage")
+        else:
+            await self.wait_module(roll_instructions)
+
+    def roll_to_formula(self, rolls):
+        formula = ""
+        for roll in rolls:
+            if roll[0] > 0:
+                formula += f"{roll[0]}d{roll[1]} "
+            if roll[2] != 0:
+                formula += f"{roll[2]:+} "
+        return formula
+
+    def show_dice_in_formula(self, roll_formula, size, values=None):
+        dice_matches = re.findall(r"(\d+)d(\d+)", roll_formula)
+        if len(dice_matches) < 1:
+            print("No dice to roll")
+            return
+        dice_count = 0
+        if re.search(r"adv", roll_formula) or re.search(r"dis", roll_formula):
+            dice_matches = [dice_matches[0], dice_matches[0]]
+        for match in dice_matches:
+            for _ in range(int(match[0])):
+                roll = values[dice_count] if values is not None else " "
+                self.show_die(roll, match[1], size=size)
+                dice_count += 1
+
 
 class RollContext(Module):
 

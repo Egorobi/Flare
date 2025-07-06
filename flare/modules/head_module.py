@@ -77,6 +77,7 @@ class HeadModule(Module):
             emitEvent('content_loaded');
         }};
         </script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
         <style type="text/tailwindcss" lang="scss">     
             body{{
                 font-family: "Roboto", sans-serif;

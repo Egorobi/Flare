@@ -116,7 +116,8 @@ class Tabs(Module):
                     else:
                         m = re.search(r"\d*", attack.attack_range)
                         ui.html(f"<b>{m.group()}</b><b class='text-slate-400 text-xs'> ft.</b>").classes("col-2")
-                    attack_bonus = int(attack.attack.split(" ")[0])
+                    attack_bonus = re.search(r"[-+]?\d+", attack.attack)
+                    attack_bonus = int(attack_bonus.group()) if attack_bonus is not None else 0
                     # ui.label(attack.attack).classes("col-2")
                     with ui.column().classes("items-center col-1"):
                         with ui.button(session.val_to_string(attack_bonus), on_click=lambda mod=attack_bonus: session.roll_dialog.wait_module([(1, 20, mod)])).classes(

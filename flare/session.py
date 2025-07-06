@@ -23,6 +23,7 @@ health_listeners = []
 hitdice_listeners = []
 spellslot_listeners = []
 charge_listeners = []
+roll_listeners = []
 
 # rest dialogs
 short_rest_dialog = None
@@ -175,3 +176,7 @@ def show_stat_info(stat, stat_name=None):
         stat_info_dialog.show_module(stat, stat_name)
     else:
         stat_info_dialog.show_module.refresh(stat, stat_name)
+
+def update_roll_listeners():
+    for listener in roll_listeners:
+        listener.roll_callback()

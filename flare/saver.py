@@ -1,8 +1,9 @@
 import glob
 import os
 import json
-from lxml import etree as et
 import re
+import uuid
+from lxml import etree as et
 
 class Saver():
 
@@ -310,6 +311,90 @@ class Saver():
         tree = et.parse(filename, self.parser)
         tree, death_saves = self.get_sub_element("death_saves", None, tree)
         return int(death_saves.attrib.get("successes", 0)), int(death_saves.attrib.get("failures", 0))
+    
+    # ROLLS
+
+    def record_roll(self, name, roll_formula, result, values=None):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, history = self.get_sub_element("roll_history", None, tree)
+        rolls = history.getchildren()
+        history.clear()
+        roll = et.Element("roll")
+        roll.attrib["roll"] = roll_formula
+        roll.attrib["result"] = str(result)
+        if values is not None:
+            roll.attrib["values"] = ",".join([str(v) for v in values])
+        rolls.insert(0, roll)
+        for i, r in enumerate(rolls):
+            if i >= 20:
+                break
+            history.append(r)
+        tree.write(filename, pretty_print=True)
+
+    def get_rolls(self, name):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, history = self.get_sub_element("roll_history", None, tree)
+        return history.getchildren()
+
+    def pin_roll(self, name, roll_formula, roll_name):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, pinned_rolls = self.get_sub_element("pinned_rolls", None, tree)
+        roll = et.Element("roll")
+        roll.attrib["roll"] = roll_formula
+        roll.attrib["name"] = roll_name
+        roll.attrib["id"] = str(uuid.uuid4())
+        pinned_rolls.append(roll)
+        tree.write(filename, pretty_print=True)
+
+    def get_pinned_rolls(self, name):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, pinned = self.get_sub_element("pinned_rolls", None, tree)
+        return pinned.getchildren()
+
+    def remove_pinned_roll(self, name, pin_id):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, pinned = self.get_sub_element("pinned_rolls", None, tree)
+        pins = pinned.getchildren()
+        pinned_attribs = dict(pinned.attrib)
+        pinned.clear()
+        for p in pins:
+            if p.attrib.get("id", None) != pin_id:
+                pinned.append(p)
+        pinned.attrib.update(pinned_attribs)
+        tree.write(filename, pretty_print=True)
+
+    def move_pinned_roll(self, name, pin_id, direction):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, pinned = self.get_sub_element("pinned_rolls", None, tree)
+        pins = pinned.getchildren()
+        idx = next((i for i, pin in enumerate(pins) if pin.attrib.get("id", None) == pin_id))
+        pin = pins.pop(idx)
+        if direction == "up":
+            idx = max(0, idx-1)
+        elif direction == "down":
+            idx = min(idx+1, len(pins)+1)
+        pins.insert(idx, pin)
+        pinned[:] = pins
+        tree.write(filename, pretty_print=True)
+
+    def save_show_pinned_rolls(self, name, value):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, pinned = self.get_sub_element("pinned_rolls", None, tree)
+        pinned.attrib["show"] = str(value).lower()
+        tree.write(filename, pretty_print=True)
+
+    def get_show_pinned_rolls(self, name):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, pinned = self.get_sub_element("pinned_rolls", None, tree)
+        return pinned.attrib.get("show", "false") == "true"
 
     # DARK MODE
 

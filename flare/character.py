@@ -243,6 +243,30 @@ class Character:
     def set_death_saves(self, successes, failures):
         self.saver.record_death_saves(self.name, successes, failures)
 
+    def get_roll_history(self):
+        return self.saver.get_rolls(self.name)
+
+    def add_roll_history(self, roll_formula, result, values=None):
+        self.saver.record_roll(self.name, roll_formula, result, values=values)
+
+    def get_pinned_rolls(self):
+        return self.saver.get_pinned_rolls(self.name)
+
+    def add_pinned_roll(self, roll_formula, roll_name=None):
+        self.saver.pin_roll(self.name, roll_formula, roll_name)
+
+    def remove_pinned_roll(self, pin_id):
+        self.saver.remove_pinned_roll(self.name, pin_id)
+    
+    def get_pinned_rolls_shown(self):
+        return self.saver.get_show_pinned_rolls(self.name)
+
+    def move_pinned_roll(self, pin_id, direction):
+        self.saver.move_pinned_roll(self.name, pin_id, direction)
+    
+    def save_pinned_rolls_shown(self, value):
+        self.saver.save_show_pinned_rolls(self.name, value)
+
     def get_racial_traits(self):
         return self.query.get_racial_traits()
 
