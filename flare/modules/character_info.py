@@ -2,6 +2,7 @@ import re
 from nicegui import ui
 from modules.module import Module
 from modules.loader import LoadingDialog
+from modules.dialogs import RollContext
 import session
 import frames
 import icons
@@ -103,8 +104,10 @@ class Initiative(Module):
             # ui.label(valToString(char.initiative)).classes("text-xl font-bold absolute-center")
             ui.space().classes("h-8")
             with ui.column().classes("absolute-center pt-3"):
-                ui.button(session.val_to_string(char.initiative), on_click=lambda mod=char.initiative: session.roll_dialog.wait_module([(1, 20, mod)])).classes(
-                                "text-xl font-bold h-8 w-12").props("dense flat unelevated text-color=adaptcolor padding='0px 0px 0px 0px'")
+                with ui.button(session.val_to_string(char.initiative), on_click=lambda mod=char.initiative: session.roll_dialog.wait_module(f"1d20 + {mod}")).classes(
+                                "text-xl font-bold h-8 w-12").props("dense flat unelevated text-color=adaptcolor padding='0px 0px 0px 0px'"):
+                    context_menu = RollContext()
+                    context_menu.show_module(char.initiative)
 
 class HeroicInspiration(Module):
     ac_size = 7

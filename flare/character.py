@@ -249,11 +249,14 @@ class Character:
     def add_roll_history(self, roll_formula, result, values=None):
         self.saver.record_roll(self.name, roll_formula, result, values=values)
 
+    def clear_roll_history(self):
+        self.saver.clear_rolls(self.name)
+
     def get_pinned_rolls(self):
         return self.saver.get_pinned_rolls(self.name)
 
-    def add_pinned_roll(self, roll_formula, roll_name=None):
-        self.saver.pin_roll(self.name, roll_formula, roll_name)
+    def add_pinned_roll(self, roll_formula, roll_name=None, position=None):
+        self.saver.pin_roll(self.name, roll_formula, roll_name, position)
 
     def remove_pinned_roll(self, pin_id):
         self.saver.remove_pinned_roll(self.name, pin_id)

@@ -135,6 +135,14 @@ class Saver():
         settings["versionReminder"] = reminder
         self.write_global_settings(settings)
 
+    def save_zoom(self, zoom):
+        settings = self.get_global_settings()
+        settings["zoom"] = str(zoom)
+        self.write_global_settings(settings)
+
+    def get_zoom(self):
+        return float(self.get_setting("zoom", "1"))
+
     ### CUSTOM
 
     def write_custom_colors(self, colors):
@@ -311,7 +319,7 @@ class Saver():
         tree = et.parse(filename, self.parser)
         tree, death_saves = self.get_sub_element("death_saves", None, tree)
         return int(death_saves.attrib.get("successes", 0)), int(death_saves.attrib.get("failures", 0))
-    
+
     # ROLLS
 
     def record_roll(self, name, roll_formula, result, values=None):
@@ -338,7 +346,14 @@ class Saver():
         tree, history = self.get_sub_element("roll_history", None, tree)
         return history.getchildren()
 
-    def pin_roll(self, name, roll_formula, roll_name):
+    def clear_rolls(self, name):
+        filename = self.find_save_file(name)
+        tree = et.parse(filename, self.parser)
+        tree, history = self.get_sub_element("roll_history", None, tree)
+        history.clear()
+        tree.write(filename, pretty_print=True)
+
+    def pin_roll(self, name, roll_formula, roll_name, position=None):
         filename = self.find_save_file(name)
         tree = et.parse(filename, self.parser)
         tree, pinned_rolls = self.get_sub_element("pinned_rolls", None, tree)
@@ -346,7 +361,10 @@ class Saver():
         roll.attrib["roll"] = roll_formula
         roll.attrib["name"] = roll_name
         roll.attrib["id"] = str(uuid.uuid4())
-        pinned_rolls.append(roll)
+        if position is None:
+            pinned_rolls.append(roll)
+        else:
+            pinned_rolls.insert(position, roll)
         tree.write(filename, pretty_print=True)
 
     def get_pinned_rolls(self, name):

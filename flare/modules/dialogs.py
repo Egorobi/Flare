@@ -1,5 +1,6 @@
 import random
 import re
+import asyncio
 from nicegui import ui
 from modules.listeners import HitDiceListener
 from modules.module import Module
@@ -59,77 +60,186 @@ class LongRestDialog(Module):
 
 class RollDiceDialog(Module):
 
-    async def wait_module(self, rolls, advantage=None):
-        # print("rolling")
-        if sum(r[0] for r in rolls) == 0 :
+    # work in progress
+    USE_HISTORY = False
+
+    def __init__(self):
+        super().__init__()
+        self.ctrl_modifier = False
+        self.shift_modifier = False
+        self.state = {"opened": False}
+
+    async def wait_module(self, roll_formula):
+        if self.shift_modifier:
+            roll_formula = re.sub(r"\d*d(\d+) ", lambda m: f"2d{m.group(1)}kh1 ", roll_formula)
+        elif self.ctrl_modifier:
+            roll_formula = re.sub(r"\d*d(\d+) ", lambda m: f"2d{m.group(1)}kl1 ", roll_formula)
+
+        result = self.process_formula(roll_formula)
+        if result is None:
             return
+
+        if len(result["history"]) > 50 or not self.USE_HISTORY:
+            result["history"] = []
+
         with ui.dialog() as dialog, ui.card().classes("items-center") as card:
             dialog.classes("dicedialog")
             card.classes("no-shadow transparent")
             card.props("square")
-            message = ""
-            if advantage is not None:
-                result = 0
-                if len(rolls) == 1:
-                    # in advantage mode only a single die is used
-                    roll = rolls[0]
-                    two_rolls = (random.randint(1, roll[1]),random.randint(1, roll[1]))
-                    highlight = 0
-                    if advantage == "advantage":
-                        result = max(two_rolls[0], two_rolls[1])
-                        message = f"Rolled {roll[0]}d{roll[1]} {session.val_to_string(roll[2])} (Advantage)"
-                        if two_rolls[0] > two_rolls[1]:
-                            highlight = 1
-                        elif two_rolls[1] > two_rolls[0]:
-                            highlight = 2
-                    elif advantage == "disadvantage":
-                        result = min(two_rolls[0], two_rolls[1])
-                        message = f"Rolled {roll[0]}d{roll[1]} {session.val_to_string(roll[2])} (Disadvantage)"
-                        if two_rolls[0] < two_rolls[1]:
-                            highlight = 1
-                        elif two_rolls[1] < two_rolls[0]:
-                            highlight = 2
-                    ui.label(message)
-                    if advantage == "advantage":
-                        highlight_color = "#a1793a, rgba(161, 121, 58, 0)"
-                    else:
-                        highlight_color = "red, rgba(255, 255, 255, 0)"
-                    with ui.row().classes("items-center w-full justify-center"):
-                        for i in range(2):
-                            if highlight == i+1:
-                                with ui.card().classes("transparent no-shadow"):
-                                    ui.element().classes("absolute-center w-full h-full").style(f"background-image: radial-gradient(closest-side, {highlight_color});")
-                                    self.show_die(two_rolls[i], roll[1])
-                            else:
-                                with ui.card().classes("transparent no-shadow"):
-                                    self.show_die(two_rolls[i], roll[1])
-                    session.char.add_roll_history(self.roll_to_formula(rolls) + f" {advantage[0:3]}", result+roll[2], values=two_rolls)
-                    ui.label(f"= {result+roll[2]}").classes("text-xl font-bold")
+            message = f"Rolled {roll_formula}"
+            ui.label(message)
+
+            if len(result["history"]) > 0:
+                history = result["history"]
+                self.draw_dice_in_dialog(history[0])
             else:
-                result = 0
-                all_rolls = []
-                for roll in rolls:
-                    for _ in range(roll[0]):
-                        all_rolls.append(random.randint(1, roll[1]))
-                result = sum(all_rolls)
-                all_dice = ",".join([f"{r[0]}d{r[1]}" for r in rolls if r[0] > 0])
-                total_mod = sum([r[2] for r in rolls])
-                message = f"Rolled {all_dice} {session.val_to_string(total_mod)}"
-                ui.label(message)
-                with ui.row().classes("items-center w-full justify-center q-pa-md").style("gap: 3rem;"):
-                    # dice = [20, 12, 100, 10, 8, 6, 4]
-                    count = 0
-                    for i, roll in enumerate(rolls):
-                        for _ in range(roll[0]):
-                            self.show_die(all_rolls[count], roll[1])
-                            count += 1
-                ui.label(f"= {result+total_mod}").classes("text-xl font-bold")
-                session.char.add_roll_history(self.roll_to_formula(rolls), result+total_mod, values=all_rolls)
+                self.draw_dice_in_dialog(result["rolls"])
+
+            ui.label(f"= {result["total"]}").classes("text-xl font-bold")
+
+            values = []
+            for roll in result["rolls"]:
+                values.append(roll[1])
+                values.append(roll[0])
+
+            session.char.add_roll_history(roll_formula, result["total"], values)
+
             ui.card().classes("absolute-center w-full h-full frameborder frame no-shadow transparent")
 
             session.update_roll_listeners()
-            
+
+            dialog.bind_value_to(self.state, "opened")
             dialog.open()
+
+            if len(result["history"]) > 0:
+                await asyncio.sleep(min(0.2, 1/len(history)))
+                for i, h in enumerate(history):
+                    if not self.state["opened"]: break
+                    if i == 0: continue
+                    self.draw_dice_in_dialog.refresh(h)
+                    await asyncio.sleep(min(0.2, 1/len(history)))
+                self.draw_dice_in_dialog.refresh(result["rolls"])
+
+
+    @ui.refreshable
+    def draw_dice_in_dialog(self, rolls):
+        with ui.row().classes("items-center w-full justify-center"):
+            for roll in rolls:
+                if roll[2] is None:
+                    with ui.card().classes("transparent no-shadow"):
+                        self.show_die(roll[1], roll[0])
+                else:
+                    if roll[2] == "high":
+                        highlight_color = "#a1793a, rgba(161, 121, 58, 0)"
+                    else:
+                        highlight_color = "red, rgba(255, 255, 255, 0)"
+                    with ui.card().classes("transparent no-shadow"):
+                        ui.element().classes("absolute-center w-full h-full").style(f"background-image: radial-gradient(closest-corner, {highlight_color});")
+                        self.show_die(roll[1], roll[0])
+
+    def process_formula(self, roll_formula):
+        # return format
+        # {total: x, rolls: [(sides, result, highlight), ...], history: state at every roll}
+
+        if not self.check_formula(roll_formula):
+            ui.notify("Invalid roll formula")
+            return None
+
+        rolls = []
+
+        history = []
+
+        # find and replace parentheses
+        while True:
+            group = re.search(r"\(([^\(\)]*)\)", roll_formula)
+            if group is None:
+                break
+            result = self.process_formula(group.group(1))
+            # rolls += result["rolls"]
+            roll_formula = roll_formula[0:group.span()[0]] + str(result["total"]) + roll_formula[group.span()[1]:]
+            history += result["history"]
+
+        # handle dice
+        while True:
+            dice = re.search(r"(\d*)d(\d+)(r\d+|rr\d+|min\d+|x\d*|kh\d+|kl\d+)?", roll_formula)
+            if dice is None:
+                break
+            batch_rolls = []
+            history_step = []
+            roll_total = 0
+            extra = dice.group(3)
+            if int(dice.group(2)) not in [4, 6, 8, 10, 12, 20, 100]:
+                ui.notify("Invalid dice in formula")
+                return
+            for _ in range(int(dice.group(1) if len(dice.group(1)) > 0 else 1)):
+                die_size = int(dice.group(2))
+                roll = random.randint(1, int(dice.group(2)))
+                history_step.append((die_size, roll, None))
+                history.append(history_step.copy())
+                if extra is not None:
+                    if re.match(r"^rr?\d+", extra):
+                        threshold = int(re.search(r"\d+", extra).group())
+                        if threshold < int(dice.group(2)):
+                            while roll <= threshold:
+                                roll = random.randint(1, int(dice.group(2)))
+                                history_step[-1] = (die_size, roll, None)
+                                history.append(history_step.copy())
+                                if not re.match("rr", extra):
+                                    # not recursive
+                                    break
+                    if re.match(r"min?\d+", extra):
+                        threshold = int(re.search(r"\d+", extra).group())
+                        if roll < threshold:
+                            roll = threshold
+                            history_step[-1] = (die_size, threshold, None)
+                            history.append(history_step.copy())
+                roll_total += roll
+                batch_rolls.append((int(dice.group(2)), roll, None))
+                if extra is not None and re.match(r"x\d*", extra):
+                    # exploding dice
+                    threshold = re.search(r"x(\d*)", extra).group(1)
+                    if len(threshold) == 0:
+                        threshold = int(dice.group(2))
+                    else:
+                        threshold = int(threshold)
+                        if threshold == 1:
+                            # prevent infinite exploding
+                            threshold = int(dice.group(2))
+                    while roll >= threshold:
+                        roll = random.randint(1, int(dice.group(2)))
+                        roll_total += roll
+                        batch_rolls.append((int(dice.group(2)), roll, None))
+                        history_step.append((die_size, roll, None))
+                        history.append(history_step.copy())
+            if extra is not None and re.match(r"k([hl])(\d+)", extra):
+                # keep
+                keep = re.search(r"k([hl])(\d+)", extra)
+                mode = keep.group(1)
+                threshold = int(keep.group(2))
+                batch_sorted = sorted(batch_rolls, key = lambda r: r[1], reverse = True if mode == "h" else False)
+                for i, s in enumerate(batch_sorted):
+                    if i >= threshold:
+                        roll_total -= s[1]
+                    else:
+                        i, m = next(((i, r) for i, r in enumerate(batch_rolls) if r[1] == s[1] and r[2] is None), None)
+                        batch_rolls[i] = (m[0], m[1], "high" if mode == "h" else "low")
+                history_step = batch_rolls.copy()
+                history.append(history_step)
+            rolls += batch_rolls
+            roll_formula = roll_formula[0:dice.span()[0]] + str(roll_total) + roll_formula[dice.span()[1]:]
+
+        # evaluating manually
+        terms = roll_formula.split(" ")
+        sign = "+"
+        total = 0
+        for term in terms:
+            # supporting only addition and subtraction currently
+            if term == "+" or term == "-":
+                sign = term
+            elif term.isdigit():
+                total += int(sign + term)
+
+        return {"total": total, "rolls": rolls, "history": history}
 
     def show_die(self, roll, die, size=10):
         f = open(f"data/assets/d{die}.svg")
@@ -155,23 +265,6 @@ class RollDiceDialog(Module):
             else:
                 ui.label(str(roll)).classes("font-bold absolute-center").style(f"font-size: {font_size}rem; color: {color};")
 
-    async def roll_from_formula(self, roll_formula):
-        dice_matches = re.findall(r"(\d+)d(\d+)", roll_formula)
-        if len(dice_matches) < 1:
-            print("No dice to roll")
-            return
-        fixed_pluses = re.findall(r"(?<!\S)\+?\d+(?!\S)", roll_formula)
-        fixed_minuses = re.findall(r"(?<!\S)\-\d+(?!\S)", roll_formula)
-        sum_fixed = sum([int(match) for match in fixed_pluses+fixed_minuses])
-        roll_instructions = [(int(match[0]), int(match[1]), 0) for match in dice_matches]
-        roll_instructions[0] = (roll_instructions[0][0], roll_instructions[0][1], sum_fixed)
-        if re.search(r"adv", roll_formula):
-            await self.wait_module(roll_instructions, "advantage")
-        elif re.search(r"dis", roll_formula):
-            await self.wait_module(roll_instructions, "disadvantage")
-        else:
-            await self.wait_module(roll_instructions)
-
     def roll_to_formula(self, rolls):
         formula = ""
         for roll in rolls:
@@ -181,30 +274,44 @@ class RollDiceDialog(Module):
                 formula += f"{roll[2]:+} "
         return formula
 
-    def show_dice_in_formula(self, roll_formula, size, values=None):
-        dice_matches = re.findall(r"(\d+)d(\d+)", roll_formula)
-        if len(dice_matches) < 1:
-            print("No dice to roll")
+    def show_dice_values(self, values, size):
+        if len(values) < 2:
             return
-        dice_count = 0
-        if re.search(r"adv", roll_formula) or re.search(r"dis", roll_formula):
-            dice_matches = [(1, dice_matches[0][1], 0), (1, dice_matches[0][1], 0)]
-        for match in dice_matches:
-            for _ in range(int(match[0])):
-                roll = values[dice_count] if values is not None else " "
-                self.show_die(roll, match[1], size=size)
-                dice_count += 1
+        for i in range(0, len(values), 2):
+            self.show_die(values[i], values[i+1], size=size)
 
+    def check_formula(self, roll_formula):
+        while True:
+            group = re.search(r"\(([^\(\)]*)\)", roll_formula)
+            if group is None:
+                break
+            if not self.check_formula(group.group(1)):
+                return False
+            # rolls += result["rolls"]
+            roll_formula = roll_formula[0:group.span()[0]] + roll_formula[group.span()[1]:]
+
+        # no parentheses left here
+        for term in roll_formula.split(" "):
+            if len(term) == 0:
+                continue
+            if re.match(r"^(\+)|(-)|(\d+)$", term):
+                continue
+            if re.match(r"^(\d*)d(\d+)(r\d+|rr\d+|min\d+|x\d*|kh\d+|kl\d+)?$", term):
+                if int(re.search(r"(\d*)d(\d+)", term).group(2)) not in [4, 6, 8, 10, 12, 20, 100]:
+                    return False
+                continue
+            return False
+
+        return True
 
 class RollContext(Module):
 
     def show_module(self, modifier):
         with ui.context_menu().classes("no-shadow adapttooltip").props(""):
             # ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent")
-            ui.menu_item('Advantage', lambda: session.roll_dialog.wait_module([(1, 20, modifier)], "advantage"), auto_close=False)
+            ui.menu_item('Advantage', lambda: session.roll_dialog.wait_module(f"2d20kh1 + {modifier}"), auto_close=False)
             ui.separator().classes("w-full")
-            ui.menu_item('Disadvantage', lambda: session.roll_dialog.wait_module([(1, 20, modifier)], "disadvantage"), auto_close=False)
-
+            ui.menu_item('Disadvantage', lambda: session.roll_dialog.wait_module(f"2d20kl1 + {modifier}"), auto_close=False)
 
 class StatInfo(Module):
 

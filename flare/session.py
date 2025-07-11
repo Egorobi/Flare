@@ -1,21 +1,26 @@
 from nicegui import ui
 from saver import Saver
 from colorschemes import color_schemes
+from character import Character
+from editors.inventory import InventoryManager
+from editors.notes import NotesManager
+# from modules.loader import LoadingDialog
+# from modules.dialogs import ShortRestDialog, LongRestDialog, RollDiceDialog, StatInfo
 
 port = None
 
-char = None
+char : Character = None
 
-zoom = 1
-
-inventory_manager = None
-notes_manager = None
+inventory_manager : InventoryManager = None
+notes_manager : NotesManager= None
 
 loader = None
 
 name = None
 
 saver = Saver()
+
+zoom = saver.get_zoom()
 
 color_scheme = color_schemes["default"]
 
