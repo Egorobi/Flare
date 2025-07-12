@@ -116,10 +116,11 @@ class Tabs(Module):
                     else:
                         m = re.search(r"\d*", attack.attack_range)
                         ui.html(f"<b>{m.group()}</b><b class='text-slate-400 text-xs'> ft.</b>").classes("col-2")
-                    attack_bonus = int(attack.attack.split(" ")[0])
+                    attack_bonus = re.search(r"[-+]?\d+", attack.attack)
+                    attack_bonus = int(attack_bonus.group()) if attack_bonus is not None else 0
                     # ui.label(attack.attack).classes("col-2")
                     with ui.column().classes("items-center col-1"):
-                        with ui.button(session.val_to_string(attack_bonus), on_click=lambda mod=attack_bonus: session.roll_dialog.wait_module([(1, 20, mod)])).classes(
+                        with ui.button(session.val_to_string(attack_bonus), on_click=lambda mod=attack_bonus: session.roll_dialog.wait_module(f"1d20 + {mod}")).classes(
                                 "text-xl q-px-sm q-py-xs outline-btn").props("dense unelevated outline"):
                             context_menu = RollContext()
                             context_menu.show_module(attack_bonus)
@@ -132,7 +133,7 @@ class Tabs(Module):
                         polarity = 1 if m.group(3) == "+" else -1
                         damage_type = m.group(5)
                         damage_only = f"{num}d{die}{plus}{mod}"
-                        with ui.button(damage_only, on_click=lambda num=num, die=die, mod=mod*polarity: session.roll_dialog.wait_module([(num, die, mod)])).classes(
+                        with ui.button(damage_only, on_click=lambda num=num, die=die, mod=mod*polarity: session.roll_dialog.wait_module(f"{num}d{die} + {mod}")).classes(
                                 "q-px-sm font-normal q-py-xs outline-btn col-2").props("dense no-caps unelevated outline"):
                             if damage_type in icons.damage_type_map:
                                 ui.html(icons.damage_type_map[damage_type]).classes("q-pl-xs adaptcolor")
@@ -340,7 +341,7 @@ class Tabs(Module):
                                         # label = session.valToString(char.readVariable(attack))
                                         with ui.row().classes("col-1"):
                                             with ui.button(session.val_to_string(attack)).classes(
-                                                "little=text outline-btn q-pa-none").props("dense unelevated outline").style("width:2rem;").on("click.stop", lambda mod=attack: session.roll_dialog.wait_module([(1, 20, mod)])):
+                                                "little=text outline-btn q-pa-none").props("dense unelevated outline").style("width:2rem;").on("click.stop", lambda mod=attack: session.roll_dialog.wait_module(f"1d20 + {mod}")):
                                                 context_menu = RollContext()
                                                 context_menu.show_module(attack)
                                     else:
@@ -411,8 +412,8 @@ class Tabs(Module):
         self.show_concentration.refresh()
 
     def concetrate_context(self, spell_id, level):
-        with ui.context_menu().classes("no-shadow items-center q-pa-sm").props("square"):
-            ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent")
+        with ui.context_menu().classes("no-shadow items-center q-pa-sm adapttooltip").props(""):
+            # ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent")
             # ui.menu_item("Concentrate", lambda: self.setConcentration(spellId, level), auto_close=True)
             ui.label("Concentrate at level:")
             ui.separator()

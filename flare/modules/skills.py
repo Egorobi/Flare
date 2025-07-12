@@ -18,7 +18,7 @@ class AbilityScore(Module):
                 ui.label(self.score.upper()).classes("ability-label")
                 ui.label(char.ability_scores[self.score][0]).classes("").on("click", lambda : session.show_stat_info(self.score.lower(), self.score.title()))
             # ui.label(valToString(char.abilityScores[score][1])).classes("text-2xl font-bold absolute-center")
-            with ui.button(session.val_to_string(char.ability_scores[self.score][1]), on_click=lambda mod=char.ability_scores[self.score][1]: session.roll_dialog.wait_module([(1, 20, mod)])).classes(
+            with ui.button(session.val_to_string(char.ability_scores[self.score][1]), on_click=lambda mod=char.ability_scores[self.score][1]: session.roll_dialog.wait_module(f"1d20 + {mod}")).classes(
                             "text-2xl font-bold q-pa-none absolute-center width").props("size=xl dense unelevated flat text-color=adaptcolor padding=sm"):
                 context_menu = RollContext()
                 context_menu.show_module(char.ability_scores[self.score][1])
@@ -56,7 +56,7 @@ class SavingThrows(Module):
                         else:
                             ui.icon("radio_button_unchecked").classes("col-1")
                         ui.label(save).classes("col-2").on("click", lambda s=scores[save.lower()]: session.show_stat_info(s.lower()+":save", f"{s.capitalize()} Saving Throw"))
-                        with ui.button(session.val_to_string(char.saving_throws[save][1]), on_click=lambda mod=char.saving_throws[save][1]: session.roll_dialog.wait_module([(1, 20, mod)])).classes(
+                        with ui.button(session.val_to_string(char.saving_throws[save][1]), on_click=lambda mod=char.saving_throws[save][1]: session.roll_dialog.wait_module(f"1d20 + {mod}")).classes(
                             "col-4 font-bold q-pa-none ").props("size=md unelevated flat text-color=adaptcolor"):
                             context_menu = RollContext()
                             context_menu.show_module(char.saving_throws[save][1])
@@ -95,7 +95,7 @@ class Skills(Module):
                             ui.icon("radio_button_unchecked").classes("col-2")
                         ui.label(skill).classes("col-7").on("click", lambda s=skill: session.show_stat_info(s.lower()))
                         # ui.label(valToString(char.skills[skill][2])).classes("col-2")
-                        with ui.button(session.val_to_string(char.skills[skill][2]), on_click=lambda mod=char.skills[skill][2]: session.roll_dialog.wait_module([(1, 20, mod)])).classes(
+                        with ui.button(session.val_to_string(char.skills[skill][2]), on_click=lambda mod=char.skills[skill][2]: session.roll_dialog.wait_module(f"1d20 + {mod}")).classes(
                             "col-2 text-md q-pa-none").props("size=0.9rem dense unelevated flat text-color=adaptColor padding=none"):
                             context_menu = RollContext()
                             context_menu.show_module(char.skills[skill][2])

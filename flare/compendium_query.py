@@ -112,13 +112,14 @@ class CompendiumQuery:
         supports = entry.find("supports")
         spell_type = None
         if supports is not None:
-            supports = supports.text.split(", ")
-            if "Spell Saving Throw" in supports:
-                spell_type = "save"
-            elif "Spell Attack" in supports:
-                spell_type = "attack"
-            else:
-                spell_type = None
+            if supports.text is not None:
+                supports = supports.text.split(", ")
+                if "Spell Saving Throw" in supports:
+                    spell_type = "save"
+                elif "Spell Attack" in supports:
+                    spell_type = "attack"
+                else:
+                    spell_type = None
 
         description = et.tostring(entry.find("./description"), method='xml',with_tail=False).decode('UTF-8')
 

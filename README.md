@@ -26,9 +26,11 @@ Physical dice are great but sometimes you don't want to hold up the game by calc
 
 You can also automatically roll checks, saves, and attacks with advantage or disadvantage to make things that much faster.
 
-Custom Dice Selection             |  Roll Result
-:-------------------------:|:-------------------------:
-<img src="images/dice_menu.png" width="60">  |  <img src="images/roll_result.png" width="200">
+Your recent rolls are recorded for convenience, and you can permanently save rolls you use particularly often. Flare supports a variety of complex roll formulas, such as rerolling low values, setting minimum dice results, and exploding dice.
+
+Custom Dice Selection             |  Roll Result    |  Roll History
+:-------------------------:|:-------------------------:|:-------------------------:
+<img src="images/dice_menu.png" width="60">  |  <img src="images/roll_result.png" width="200"> | <img src="images/roll_log.png" width="120">
 
 ## :art: Customization
 Match your character's look with different color schemes as well as custom colors, dark mode, and different backgrounds.

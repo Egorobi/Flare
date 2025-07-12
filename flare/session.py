@@ -1,15 +1,18 @@
 from nicegui import ui
 from saver import Saver
 from colorschemes import color_schemes
+from character import Character
+from editors.inventory import InventoryManager
+from editors.notes import NotesManager
+# from modules.loader import LoadingDialog
+# from modules.dialogs import ShortRestDialog, LongRestDialog, RollDiceDialog, StatInfo
 
 port = None
 
-char = None
+char : Character = None
 
-zoom = 1
-
-inventory_manager = None
-notes_manager = None
+inventory_manager : InventoryManager = None
+notes_manager : NotesManager= None
 
 loader = None
 
@@ -17,12 +20,15 @@ name = None
 
 saver = Saver()
 
+zoom = saver.get_zoom()
+
 color_scheme = color_schemes["default"]
 
 health_listeners = []
 hitdice_listeners = []
 spellslot_listeners = []
 charge_listeners = []
+roll_listeners = []
 
 # rest dialogs
 short_rest_dialog = None
@@ -175,3 +181,7 @@ def show_stat_info(stat, stat_name=None):
         stat_info_dialog.show_module(stat, stat_name)
     else:
         stat_info_dialog.show_module.refresh(stat, stat_name)
+
+def update_roll_listeners():
+    for listener in roll_listeners:
+        listener.roll_callback()

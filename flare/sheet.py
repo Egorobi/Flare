@@ -1,3 +1,4 @@
+import re
 from character import Character
 from modules.character_info import CharacterDetails, MovementSpeed, Initiative, ArmorClass, Conditions, HeroicInspiration
 from modules.head_module import HeadModule
@@ -8,6 +9,7 @@ from modules.tabs import Tabs
 from modules.dice_roller import DiceRoller
 from modules.loader import LoadingDialog
 from modules.help_screen import HelpScreen
+from modules.roll_log import RollLog
 from editors.editor import Editor
 from editors.inventory import InventoryManager
 from editors.notes import NotesManager
@@ -21,8 +23,9 @@ from nicegui.events import KeyEventArguments
 class Sheet():
 
     def __init__(self, aurora_file):
-        # cwd = os.getcwd()
-        # print(cwd)
+        # set saved zoom
+        ui.run_javascript(f'document.body.style.zoom={session.zoom};')
+
         self.char = Character(aurora_file)
         session.char = self.char
         session.name = self.char.name
@@ -49,12 +52,17 @@ class Sheet():
         session.roll_dialog = RollDiceDialog()
         self.dice_roller = DiceRoller()
 
+        # print(session.roll_dialog.process_formula("(2d4 kh1)"))
+        # session.roll_dialog.wait_module("1d4x")
+
         ui.keyboard(self.handle_key)
 
         # spell id map
         for i in range(0, 10):
             for spell in session.char.spells[i]:
                 storage.spell_id_map[spell.spell_id] = spell
+
+        self.key_dice = ""
 
     def show_sheet(self):
         self.dice_roller.show_module() # type: ignore
@@ -123,17 +131,26 @@ class Sheet():
                         # tabs
                         tabs = Tabs()
                         tabs.show_module()
-        with ui.row().classes("w-full justify-center"):
+        with ui.row().classes("w-full justify-center items-center"):
             ui.button("Return to Home", on_click=lambda: ui.navigate.to("/character_select")).props("outline")
+            help_screen = HelpScreen()
+            ui.button(icon='question_mark', on_click=lambda: help_screen.show_module()).props('color=primary outline size=sm rounded').classes("q-pa-sm")
 
-        # Help button
-        help_screen = HelpScreen()
+        # Roll log
+        self.roll_log = RollLog()
         with ui.page_sticky(x_offset=18, y_offset=18):
-            ui.button(icon='question_mark', on_click=lambda: help_screen.show_module()) \
-                .props('fab color=primary outline size=md')
+            ui.button(icon='history', on_click=lambda: self.roll_log.show_module()).props('fab color=primary outline size=md')
+        # Help button
+        # help_screen = HelpScreen()
+        # with ui.page_sticky(x_offset=18, y_offset=80):
+        #     ui.button(icon='question_mark', on_click=lambda: help_screen.show_module()).props('fab color=primary outline padding=sm')
 
     async def handle_key(self, e: KeyEventArguments):
         # print(e.key.name)
+
+        session.roll_dialog.ctrl_modifier = e.modifiers.ctrl
+        session.roll_dialog.shift_modifier = e.modifiers.shift
+
         if e.modifiers.ctrl and e.action.keydown:
             if e.key.name == "=":
                 self.zoom(1)
@@ -142,6 +159,31 @@ class Sheet():
         elif e.key.name == "r" and e.action.keydown:
             # try to roll selected dice
             await self.roll_selected()
+        elif e.key.name == "h" and e.action.keydown:
+            if self.roll_log.state["opened"]:
+                self.roll_log.dialog.close()
+            else:
+                self.roll_log.show_module()
+        elif e.key.name.isdigit() and e.action.keydown:
+            self.key_dice += e.key.name
+        elif e.key.name == "d" and e.action.keydown:
+            if "d" not in self.key_dice:
+                self.key_dice += "d"
+            else:
+                self.key_dice = "d"
+        elif e.key.name == "c" and e.action.keydown:
+            dice = re.search(r"^(\d*)d(\d+)$", self.key_dice)
+            if len(self.key_dice) == 0:
+                self.key_dice = ""
+                return
+            if dice is None or int(dice.group(2)) not in [4, 6, 8, 10, 12, 20, 100]:
+                ui.notify(f"Invalid dice entered: {self.key_dice}")
+                self.key_dice = ""
+            else:
+                if dice.group(1) == "":
+                    self.key_dice = "1" + self.key_dice
+                await session.roll_dialog.wait_module(self.key_dice)
+                self.key_dice = ""
 
     async def roll_selected(self):
         selection = await ui.run_javascript("""
@@ -155,10 +197,13 @@ class Sheet():
 
         return text;
         """)
-        await self.dice_roller.roll_dice_from_string(selection)
+        if len(selection) == 0:
+            return
+        await session.roll_dialog.wait_module(selection)
 
     def zoom(self, direction):
         zoom = session.zoom
         zoom = max(0.1, zoom + 0.1*direction)
         session.zoom = zoom
+        session.saver.save_zoom(zoom)
         ui.run_javascript(f'document.body.style.zoom={zoom};')

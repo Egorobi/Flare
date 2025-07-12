@@ -32,3 +32,11 @@ class ChargeListener(Module):
 
     def charge_callback(self):
         pass
+
+class RollsListener(Module):
+
+    def __init__(self):
+        session.roll_listeners.append(self)
+
+    def roll_callback(self):
+        pass

@@ -9,16 +9,17 @@ class HelpScreen(Module):
         pass
 
     def show_module(self):
-        with ui.dialog() as dialog, ui.card().classes("items-center") as card:
+        with ui.dialog() as dialog, ui.card() as card:
             # dialog.classes("dicedialog")
-            card.classes("no-shadow q-pa-none").props("square bordered")
-            card.props("square")
+            card.classes("no-shadow q-pa-none items-center").props("square bordered")
+            card.style("max-width: none; width: 60vw; height: 90vh; z-index: -1;")
 
             with open("data/tips.md") as tips:
                 tips_content = tips.read()
 
-            ui.markdown(tips_content).classes("q-pa-lg")
+            with ui.scroll_area().classes("h-full transparent q-my-xs"):
+                    ui.markdown(tips_content).classes("q-px-md")
 
-            ui.card().classes("absolute-center w-full h-full frameborder frame no-shadow transparent")
+            ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent").style("z-index: -1;")
 
         dialog.open()
