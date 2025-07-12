@@ -95,9 +95,7 @@ class RollMessage(Module):
                 ui.separator().props("vertical")
                 ui.label(self.roll).classes("text-sm text-slate-400 q-px-xs")
                 with ui.button(on_click=lambda: session.roll_dialog.wait_module(self.roll)).props("flat").classes("q-mr-sm q-pa-md items-center").style("width: 6rem;"):
-                    count = self.dice_count(self.roll)
-                    if "adv" in self.roll or "dis" in self.roll:
-                        count = 2
+                    count = int(len(self.values) / 2)
                     with ui.grid(columns = count if count < 5 else 4).style("gap: 1.5rem;"):
                         session.roll_dialog.show_dice_values(values=self.values, size=5)
                     ui.tooltip("Re-roll").classes("adapttooltip")
