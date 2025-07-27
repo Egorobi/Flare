@@ -55,14 +55,14 @@ jobs:
           python-version: '3.13'
           
       - name: Create virtual environment
-        shell: cmd
+        shell: bash
         run: |
           python -m venv venv
           venv\Scripts\python -m pip install --upgrade pip
           venv\Scripts\python -m pip install -r requirements.txt
           
       - name: Create linux executable
-        shell: cmd
+        shell: bash
         run: |
            venv\Scripts\pyinstaller Flare.spec --noconfirm
            echo "::debug::${PWD}"
