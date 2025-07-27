@@ -1,11 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 a = Analysis(
     ['flare/main.py'],
     pathex=[],
     binaries=[],
-    datas=[('./venv/Lib/site-packages/nicegui', 'nicegui'),
+    datas=[('./venv/lib/site-packages/nicegui', 'nicegui'),
     ('./data/assets', './assets'),
     ('./data/elements', './elements'),
     ('./data/tips.md', '.'),
