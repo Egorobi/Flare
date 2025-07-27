@@ -5,11 +5,11 @@ a = Analysis(
     ['flare/main.py'],
     pathex=[],
     binaries=[],
-    datas=[('.\\venv\\Lib\\site-packages\\nicegui', 'nicegui'),
-    ('.\\data\\assets', '.\\assets'),
-    ('.\\data\\elements', '.\\elements'),
-    ('.\\data\\tips.md', '.'),
-    ('.\\data\\saves\\colors.json', '.\\saves')],
+    datas=[('./venv/Lib/site-packages/nicegui', 'nicegui'),
+    ('./data/assets', './assets'),
+    ('./data/elements', './elements'),
+    ('./data/tips.md', '.'),
+    ('./data/saves/colors.json', './saves')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -21,7 +21,7 @@ a = Analysis(
 
 pyz = PYZ(a.pure)
 splash = Splash(
-    '.\\data\\assets\\splash.png',
+    './data/assets/splash.png',
     binaries=a.binaries,
     datas=a.datas,
     text_pos=None,
@@ -48,7 +48,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     contents_directory="data",
-    icon = ".\\data\\assets\\favicon2.ico",
+    icon = "./data/assets/favicon2.ico",
 )
 coll = COLLECT(
     exe,
