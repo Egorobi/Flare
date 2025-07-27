@@ -24,7 +24,6 @@ jobs:
         shell: cmd
         run: |
            venv\Scripts\pyinstaller.exe Flare.spec --noconfirm
-           echo "::debug::%CD%"
            
       - name: Upload windows executable folder as ZIP
         uses: actions/upload-artifact@v4
@@ -65,16 +64,9 @@ jobs:
         shell: bash
         run: |
            venv/bin/pyinstaller Flare.spec --noconfirm
-           echo "::debug::${PWD}"
            
       - name: Upload linux executable folder as ZIP
         uses: actions/upload-artifact@v4
         with:
           name: linux-executable
           path: dist/Flare/
-
-      # - name: Upload windows installer as ZIP
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: windows-installer
-      #     path: Output/
