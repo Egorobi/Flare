@@ -65,7 +65,8 @@ jobs:
       - name: Create linux executable
         shell: bash
         run: |
-           ls -la ./venv/lib
+           ls -la ./venv/lib/python3.13
+           find ./venv/ -name nicegui
            venv/bin/pyinstaller Flare.spec --noconfirm
            echo "::debug::${PWD}"
            
