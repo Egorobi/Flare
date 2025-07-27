@@ -58,15 +58,12 @@ jobs:
         shell: bash
         run: |
           python -m venv venv
-          ls -la venv
           venv/bin/python -m pip install --upgrade pip
           venv/bin/python -m pip install -r requirements.txt
           
       - name: Create linux executable
         shell: bash
         run: |
-           ls -la ./venv/lib/python3.13
-           find ./venv/ -name nicegui
            venv/bin/pyinstaller Flare.spec --noconfirm
            echo "::debug::${PWD}"
            
