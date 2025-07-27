@@ -58,8 +58,9 @@ jobs:
         shell: bash
         run: |
           python -m venv venv
-          venv/Scripts/python -m pip install --upgrade pip
-          venv/Scripts/python -m pip install -r requirements.txt
+          ls -la venv
+          venv/scripts/python -m pip install --upgrade pip
+          venv/scripts/python -m pip install -r requirements.txt
           
       - name: Create linux executable
         shell: bash
