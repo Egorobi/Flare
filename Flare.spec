@@ -1,10 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import platform
+if platform.system() == "Windows":
+    venv_path = './venv/Lib/'
+else:
+    venv_path = './venv/lib/python3.13/'
+
 a = Analysis(
     ['flare/main.py'],
     pathex=[],
     binaries=[],
-    datas=[('./venv/lib/site-packages/nicegui', 'nicegui'),
+    datas=[(venv_path + '/site-packages/nicegui', 'nicegui'),
     ('./data/assets', './assets'),
     ('./data/elements', './elements'),
     ('./data/tips.md', '.'),
