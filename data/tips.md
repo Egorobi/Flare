@@ -9,7 +9,9 @@ Ctrl + and Ctrl - can be used to zoom in and out.
 Right click any skill, saving throw, or attack modifier to roll it with advantage or disadvantage.
 Alternatively, SHIFT+click or CTRL+click to immediately roll with advantage or disadvantage respectively.
 
-##### Reroll
+##### Dice Roll Menu
+Right click a die in the dice roller to decrease the number of dice selected.
+
 After rolling a custom set of dice through the dice roller, reroll the same set by opening the dice selection and clicking the reroll icon that has replaced the checkmark.
 
 ##### Roll History

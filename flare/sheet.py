@@ -67,79 +67,82 @@ class Sheet():
     def show_sheet(self):
         self.dice_roller.show_module() # type: ignore
         self.dice_roller.show_module.refresh()
+        with ui.row().classes("w-full h-full no-wrap"):
+            with ui.column().classes("w-full h-full"):
+                with ui.card().classes("everything transparent no-shadow").style("max-width: 85rem;"):
+                    add_head = HeadModule()
+                    add_head.add_head()
+                    character_description = CharacterDetails(self.char)
+                    character_description.show_module()
 
-        with ui.card().classes("everything transparent no-shadow").style("max-width: 85rem;"):
-            add_head = HeadModule()
-            add_head.add_head()
-            character_description = CharacterDetails(self.char)
-            character_description.show_module()
+                    with ui.row().classes("no-wrap justify-between items-center").style("gap:1.1rem;"):
+                        # ability scores
+                        ability_scores = AbilityScores()
+                        ability_scores.show_module()
 
-            with ui.row().classes("no-wrap justify-between items-center").style("gap:1.1rem;"):
-                # ability scores
-                ability_scores = AbilityScores()
-                ability_scores.show_module()
+                        # proficiency bonus
+                        proficiency_bonus = ProficiencyBonus()
+                        proficiency_bonus.show_module()
 
-                # proficiency bonus
-                proficiency_bonus = ProficiencyBonus()
-                proficiency_bonus.show_module()
+                        # hitpoints
+                        hitpoints = Hitpoints()
+                        hitpoints.show_module()
 
-                # hitpoints
-                hitpoints = Hitpoints()
-                hitpoints.show_module()
+                    with ui.row().classes("no-wrap justify-between q-gutter-md"):
+                        with ui.row().classes("no-wrap col-auto").style("height:45rem"):
+                            with ui.column().classes("col-6 items-center"):
+                                ui.image(session.char.get_portrait()).style("width: 14rem; height: 14rem;")
 
-            with ui.row().classes("no-wrap justify-between q-gutter-md"):
-                with ui.row().classes("no-wrap col-auto").style("height:45rem"):
-                    with ui.column().classes("col-6 items-center"):
-                        ui.image(session.char.get_portrait()).style("width: 14rem; height: 14rem;")
+                                # saving throws
+                                saving_throws = SavingThrows()
+                                saving_throws.show_module()
 
-                        # saving throws
-                        saving_throws = SavingThrows()
-                        saving_throws.show_module()
+                                # passive senses
+                                senses = PassiveSenses()
+                                senses.show_module()
 
-                        # passive senses
-                        senses = PassiveSenses()
-                        senses.show_module()
+                            # skills
+                            skills = Skills()
+                            skills.show_module()
 
-                    # skills
-                    skills = Skills()
-                    skills.show_module()
+                        with ui.column().classes():
+                            # ac and stuff
+                            with ui.row().classes("no-wrap items-center justify-between").style("width:41rem;"):
+                                # walking speed
+                                movement_speed = MovementSpeed()
+                                movement_speed.show_module()
+                                with ui.card().classes("w-32 items-center transparent no-shadow q-pa-none").style("gap:0.1rem;"):
+                                    frames.show_frame("inspiration_initiative")
+                                    # initiative
+                                    initiative = Initiative()
+                                    initiative.show_module()
+                                    # inspiration
+                                    inspiration = HeroicInspiration()
+                                    inspiration.show_module()
+                                # ac
+                                armor_class = ArmorClass()
+                                armor_class.show_module()
+                                # conditions
+                                conditions = Conditions()
+                                conditions.show_module()
 
-                with ui.column().classes():
-                    # ac and stuff
-                    with ui.row().classes("no-wrap items-center justify-between").style("width:41rem;"):
-                        # walking speed
-                        movement_speed = MovementSpeed()
-                        movement_speed.show_module()
-                        with ui.card().classes("w-32 items-center transparent no-shadow q-pa-none").style("gap:0.1rem;"):
-                            frames.show_frame("inspiration_initiative")
-                            # initiative
-                            initiative = Initiative()
-                            initiative.show_module()
-                            # inspiration
-                            inspiration = HeroicInspiration()
-                            inspiration.show_module()
-                        # ac
-                        armor_class = ArmorClass()
-                        armor_class.show_module()
-                        # conditions
-                        conditions = Conditions()
-                        conditions.show_module()
+                            # all the tabs
+                            with ui.card().classes("w-full q-pa-none transparent no-shadow").style("height: 37rem; width:41rem"):
+                                frames.show_frame("tabs")
+                                # tabs
+                                tabs = Tabs()
+                                tabs.show_module()
+                with ui.row().classes("w-full justify-center items-center"):
+                    ui.button("Return to Home", on_click=lambda: ui.navigate.to("/character_select")).props("outline")
+                    help_screen = HelpScreen()
+                    ui.button(icon='question_mark', on_click=lambda: help_screen.show_module()).props('color=primary outline size=sm rounded').classes("q-pa-sm")
 
-                    # all the tabs
-                    with ui.card().classes("w-full q-pa-none transparent no-shadow").style("height: 37rem; width:41rem"):
-                        frames.show_frame("tabs")
-                        # tabs
-                        tabs = Tabs()
-                        tabs.show_module()
-        with ui.row().classes("w-full justify-center items-center"):
-            ui.button("Return to Home", on_click=lambda: ui.navigate.to("/character_select")).props("outline")
-            help_screen = HelpScreen()
-            ui.button(icon='question_mark', on_click=lambda: help_screen.show_module()).props('color=primary outline size=sm rounded').classes("q-pa-sm")
-
-        # Roll log
-        self.roll_log = RollLog()
-        with ui.page_sticky(x_offset=18, y_offset=18):
-            ui.button(icon='history', on_click=lambda: self.roll_log.show_module()).props('fab color=primary outline size=md')
+                # Roll log
+                self.roll_log = RollLog()
+                with ui.page_sticky(x_offset=18, y_offset=18):
+                    ui.button(icon='history', on_click=lambda: self.roll_log.show_module()).props('fab color=primary outline size=md')
+            self.right_space = ui.space().style(r"width: 20rem;")
+            self.right_space.bind_visibility_from(self.roll_log.state, "opened")
         # Help button
         # help_screen = HelpScreen()
         # with ui.page_sticky(x_offset=18, y_offset=80):

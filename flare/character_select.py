@@ -103,8 +103,8 @@ class SelectPage():
         root = Tk()
         filetypes = [('aurora fles', '*.dnd5e')]
         root.withdraw()
-        file = fd.askopenfilename(filetypes=filetypes, title="Choose aurora character file", initialdir="/", parent=root)
         root.attributes('-topmost', True)
+        file = fd.askopenfilename(filetypes=filetypes, title="Choose aurora character file", parent=root)
         root.after_idle(root.attributes, '-topmost', False)
         # label.set_text(file)
         self.character_path = file
@@ -161,7 +161,12 @@ class SelectPage():
 
     def check_for_update(self):
         # get latest release version
-        response = requests.get("https://api.github.com/repos/Egorobi/Flare/releases/latest", timeout=5)
+        try:
+            response = requests.get("https://api.github.com/repos/Egorobi/Flare/releases/latest", timeout=5)
+        except requests.exceptions.Timeout:
+            return
+        except requests.exceptions.RequestException:
+            return
         if response.raise_for_status() is not None:
             # response error
             return

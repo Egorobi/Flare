@@ -332,7 +332,7 @@ class CompendiumQuery:
             sheet_description = None
             for desc in sheet_descriptions:
                 description_level = int(desc.attrib.get("level", 0))
-                if description_level <= self.level and description_level > highest_level:
+                if description_level <= self.level and description_level >= highest_level:
                     highest_level = description_level
                     sheet_description = desc.text
         else:

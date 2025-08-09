@@ -38,8 +38,8 @@ class CharacterDetails(Module):
             dark.bind_value(dark_mode_switch, "value")
             # num_schemes = float(len(color_schemes))
             with ui.dropdown_button('', icon="palette", color="primary", auto_close=False).props("outline dense content-class=no-shadow"):
-                ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent")
-                with ui.grid(columns=2).classes("q-px-sm"):
+                # ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent")
+                with ui.grid(columns=2).classes("q-px-sm adapttooltip"):
                     for scheme in color_schemes:
                         label = "Flare Gold" if scheme == "default" else scheme
                         with ui.row().classes("items-center justify-start px-1").style("gap:0rem;"):
@@ -185,7 +185,8 @@ class Conditions(Module):
                     ui.separator().classes("w-full")
                     self.conditions_label = ui.label().classes("q-pl-sm little-text")
                     with ui.dropdown_button('', split=False).props("outline").classes("absolute w-32 h-24 items-center").style("opacity: 0.0;"):
-                        ui.card().classes("absolute-center w-full h-full frameborder frame no-shadow transparent")
+                        # ui.card().classes("absolute-center w-full h-full frameborder frame no-shadow transparent")
+                        ui.card().classes("absolute-center w-full h-full adapttooltip frame no-shadow transparent")
                         with ui.grid(columns=2).classes("q-pa-sm"):
                             for condition in conditions:
                                 with ui.row().classes("items-center").style("gap:0.1rem;"):

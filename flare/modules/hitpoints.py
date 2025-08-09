@@ -44,7 +44,7 @@ class Hitpoints(HealthListener):
             with ui.row().classes("little-text h-2 justify-between q-pt-sm"):
                 ui.label("CURRENT")
                 ui.label("MAX").classes("w-12 text-center")
-            with ui.row().classes("text-3xl vertical-middle"):
+            with ui.row().classes("text-3xl vertical-middle no-wrap"):
                 self.current_hp_label = ui.label(current_hp)
                 ui.label(" / ")
                 ui.label(self.char.max_hp)

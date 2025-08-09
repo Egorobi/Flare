@@ -210,6 +210,8 @@
             <stat name="ac:calculation" value="ac:armored" bonus="calculation" equipped="[armor:any]" alt="Armored" merge="true" />
             <!-- always add shield to ac -->
             <stat name="ac:calculation" value="ac:shield" bonus="shield" alt="Shield" />
+            <!-- always add misc bonus to ac -->
+            <stat name="ac:calculation" value="ac:misc" bonus="misc" alt="Miscellaneous" />
             <!--<stat name="AC" value="Dexterity Modifier" bonus="base:modifier" equipped="[armor:none]" />
         <stat name="AC" value="Dexterity Modifier" bonus="base:modifier" equipped="[armor:light]" />
         <stat name="AC" value="Dexterity Modifier" bonus="base:modifier" equipped="[armor:medium]" cap="ac:armored:dexterity:cap" />-->

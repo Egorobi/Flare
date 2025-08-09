@@ -48,7 +48,10 @@ class Settings():
 
         with ui.card().classes("everything transparent no-shadow items-center").style("max-width: 85rem; min-width:85rem;"):
             with ui.column().classes("justify-left"):
-                ui.button(icon="arrow_back", on_click=lambda: self.go_back()).props("outline")
+                with ui.row().classes("items-center"):
+                    ui.button(icon="arrow_back", on_click=lambda: self.go_back()).props("outline dense")
+                    ui.label("Settings").classes("text-primary font-bold text-3xl")
+                ui.separator()
 
                 ui.label("Content Directory").classes("font-bold text-primary text-xl")
                 with ui.row().classes("items-center"):
@@ -60,6 +63,7 @@ class Settings():
                     ui.button(icon="edit", on_click=lambda: self.open_content_dialog()).props("outline dense").classes("text-sm w-9 h-9")
                     with ui.icon("question_mark").classes("text-primary").props("size=sm"):
                         ui.tooltip(r"The topmost folder of the aurora additional content directory (5e Character Builder\custom)").classes("adapttooltip")
+                ui.separator()
 
                 ui.label("Main Menu Color").classes("font-bold text-primary text-xl")
                 ui.label("(Character sheet colors are set from the sheet itself)").classes("italic text-xs")
@@ -78,6 +82,7 @@ class Settings():
                     dark_mode_switch.set_value(self.saver.get_menu_dark_mode())
                     dark = ui.dark_mode()
                     dark.bind_value(dark_mode_switch, "value")
+                ui.separator()
 
                 ui.label("Dark Mode Background").classes("font-bold text-primary text-xl")
                 with ui.row().classes("items-center"):
@@ -93,6 +98,7 @@ class Settings():
                             self.light_backgrounds[background_name] = ui.card().style(background).on("click", lambda b=background_name: self.update_background(b, False)).classes("w-20 h-20").props("flat bordered")
                             ui.label(background_name.capitalize())
                     self.update_background_select(self.saver.get_background(dark=False), dark=False)
+                ui.separator()
 
                 # frames = [x for x in os.walk(self.frameDirectory)]
                 frames = os.listdir(self.frame_directory)
@@ -106,9 +112,11 @@ class Settings():
                             self.frame_buttons[f] = ui.image(f"data/assets/frames/{f}/border_frame.png").on("click", lambda f=f: self.update_frames(f)).classes("w-20 h-20").props("flat bordered")
                             ui.label(f.capitalize())
                     self.update_frame_select(self.saver.get_frame_style())
+                ui.separator()
                 
                 ui.label("Update Reminders").classes("font-bold text-primary text-xl")
                 ui.checkbox("Remind me about new Flare releases", value=Version(self.saver.get_version_reminder()) < Version(VERSION), on_change=lambda e: self.set_version_reminder(e.value))
+                ui.separator()
 
                 ui.label("Miscellaneous").classes("font-bold text-primary text-xl")
                 

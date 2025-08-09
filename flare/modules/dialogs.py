@@ -82,8 +82,9 @@ class RollDiceDialog(Module):
         if len(result["history"]) > 50 or not self.USE_HISTORY:
             result["history"] = []
 
-        with ui.dialog() as dialog, ui.card().classes("items-center") as card:
-            dialog.classes("dicedialog")
+        with ui.dialog().props("") as dialog, ui.card().classes("items-center") as card:
+            dialog.classes("dicedialog w-full")
+            dialog.style("outline: dotted;")
             card.classes("no-shadow transparent")
             card.props("square")
             message = f"Rolled {roll_formula}"
@@ -140,6 +141,8 @@ class RollDiceDialog(Module):
     def process_formula(self, roll_formula):
         # return format
         # {total: x, rolls: [(sides, result, highlight), ...], history: state at every roll}
+
+        roll_formula = self.pad_symbols(roll_formula)
 
         if not self.check_formula(roll_formula):
             ui.notify("Invalid roll formula")
@@ -253,16 +256,21 @@ class RollDiceDialog(Module):
         with ui.card().classes("no-shadow transparent q-pa-none"):
             ui.html(svg).classes("absolute-center")
             color = "var(--q-adaptcolor)"
+            outline = ""
             if int(roll) == 1:
                 color = "#C73032"
             elif roll == die:
                 color = "#d4af37"
+            if color is not "var(--q-adaptcolor)":
+                outline = f"-webkit-text-stroke: 0.5px var(--q-adaptcolor);"
+                # outline = f"text-shadow: 0px 0px 10px {color};"
             if die == 100:
                 # ui.label(str(roll)).classes("text-xl mix-blend-difference absolute-center").style("color: {};".format(color))
                 # ui.label(str(roll)).classes("text-xl absolute-center").style("color: {}; background-color: rgba(0, 0, 0, 0.3); border-radius: 5px;".format(color))
                 ui.label(str(roll)).classes("absolute-center").style(f"font-size: {font_size}rem; color: {color}; backdrop-filter: blur(3px); border-radius: 5px;")
                 # ui.label(str(roll)).classes("text-xl absolute-center").style("color: {}; border-radius: 5px;".format(color))
             else:
+                # ui.label(str(roll)).classes("font-bold absolute-center").style(f"font-size: {font_size}rem; color: {color};")
                 ui.label(str(roll)).classes("font-bold absolute-center").style(f"font-size: {font_size}rem; color: {color};")
 
     def roll_to_formula(self, rolls):
@@ -280,7 +288,16 @@ class RollDiceDialog(Module):
         for i in range(0, len(values), 2):
             self.show_die(values[i], values[i+1], size=size)
 
+    def pad_symbols(self, roll_formula):
+        roll_formula = re.sub(r"(\S)\+", lambda m: m.group(1) + " +", roll_formula)
+        roll_formula = re.sub(r"\+(\S)", lambda m: "+ " + m.group(1), roll_formula)
+        roll_formula = re.sub(r"(\S)-", lambda m: m.group(1) + " -", roll_formula)
+        roll_formula = re.sub(r"-(\S)", lambda m: "- " + m.group(1), roll_formula)
+        return roll_formula
+
     def check_formula(self, roll_formula):
+        roll_formula = self.pad_symbols(roll_formula)
+
         while True:
             group = re.search(r"\(([^\(\)]*)\)", roll_formula)
             if group is None:

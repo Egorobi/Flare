@@ -48,7 +48,8 @@ class DiceRoller(Module):
                     label = "label="+str(count[i])
                 dice_icon = f"icon=img:/assets/d{die}.svg"
                 with ui.element('q-fab-action').props(f'{dice_icon} color=theme outline label-position=left text-color=theme dietype={die} {label}') \
-                    .on('click', lambda i=i, die=die: self.set_custom_dice_count(i, die)).classes("q-ml-md"):
+                    .on('click', lambda i=i, die=die: self.set_custom_dice_count(i, die)).classes("q-ml-md") \
+                    .on('contextmenu', lambda i=i, die=die: self.set_custom_dice_count(i, die, False)).classes("q-ml-md"):
                     ui.tooltip(f"D{die}").classes('text-sm').props("anchor='center right' self='center left'").classes("adapttooltip")
             # formula_input = ui.input("Roll formula", validation={'Invalid formula': lambda value: session.roll_dialog.check_formula(value)}).props("outlined")
 
@@ -89,10 +90,14 @@ class DiceRoller(Module):
         self.confirm_button.props["icon"] = "cached"
         self.confirm_button.update()
 
-    def set_custom_dice_count(self, index, dice):
-        self.custom_roll[index] += 1
+    def set_custom_dice_count(self, index, dice, increase=True):
+        if increase:
+            self.custom_roll[index] += 1
+        else:
+            self.custom_roll[index] = max(0, self.custom_roll[index]-1)
+        label = str(self.custom_roll[index]) if self.custom_roll[index] > 0 else "\'\'"
         assert self.rolling_menu is not None, "Rolling menu not initialized"
-        next(x for i,x in enumerate(self.rolling_menu.descendants()) if x.props.get("dietype") == str(dice)).props("label="+str(self.custom_roll[index]))
+        next(x for i,x in enumerate(self.rolling_menu.descendants()) if x.props.get("dietype") == str(dice)).props("label="+label)
         self.rolling_menu.run_method("show")
         assert self.confirm_button is not None, "Roll button not initialized"
         self.confirm_button.props["icon"] = "done"

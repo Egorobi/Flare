@@ -141,6 +141,8 @@ class HeadModule(Module):
             }}
             .dicedialog{{
                 backdrop-filter: blur(10px);
+                max-width: none;
+                max-height: none;
             }}
             .debug{{
                 outline-style: dotted;

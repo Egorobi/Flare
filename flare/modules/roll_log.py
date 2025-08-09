@@ -12,12 +12,12 @@ class RollLog(RollsListener):
         self.state = {"opened": False}
         self.dialog = None
 
-    def show_module(self):
-        with ui.dialog().props("full-height") as dialog, ui.card().classes("justify-end") as card:
+        with ui.dialog().props("full-height seamless") as self.dialog, ui.card().classes("justify-end") as card:
             card.classes("fixed-top-right h-full no-shadow q-px-none square q-py-sm").props("square bordered").style("width: 20rem;")
             back_space = ui.space().style("height: 0.01rem;")
             self.show_roll_history()
-            with ui.row().classes('items-center justify-between w-full'):
+            with ui.row().classes('items-center justify-between w-full q-pl-sm'):
+                ui.button("Hide", icon="chevron_right", on_click=lambda: self.dialog.close()).props("outline dense size=sm")
                 self.pinned_toggle = ui.checkbox("Show Pinned", value=session.char.get_pinned_rolls_shown(), on_change=lambda e: session.char.save_pinned_rolls_shown(e.value)).classes("q-my-none q-mx-md").props("unchecked-icon='bi-pin' checked-icon='close' dense").style("z-index: 3;")
                 ui.button("Clear Log", on_click=lambda: self.clear_rolls()).classes("q-mr-md").props("outline dense size=sm")
             back_space.bind_visibility_from(self.pinned_toggle, "value")
@@ -26,10 +26,12 @@ class RollLog(RollsListener):
 
             # ui.button("add roll", on_click=lambda: self.test_func())
             ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent").style("z-index: -1;")
+        
+        self.dialog.bind_value_to(self.state, "opened")
 
-        dialog.bind_value_to(self.state, "opened")
-        dialog.open()
-        self.dialog = dialog
+    def show_module(self):
+        self.roll_callback()
+        self.dialog.open()
 
     def clear_rolls(self):
         session.char.clear_roll_history()
