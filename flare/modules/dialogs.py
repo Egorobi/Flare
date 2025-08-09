@@ -261,7 +261,7 @@ class RollDiceDialog(Module):
                 color = "#C73032"
             elif roll == die:
                 color = "#d4af37"
-            if color is not "var(--q-adaptcolor)":
+            if color != "var(--q-adaptcolor)":
                 outline = f"-webkit-text-stroke: 0.5px var(--q-adaptcolor);"
                 # outline = f"text-shadow: 0px 0px 10px {color};"
             if die == 100:
@@ -338,8 +338,8 @@ class StatInfo(Module):
             name = stat.title()
         # print(session.char.query.formatContributors(stat))
         contributors = session.char.query.format_contributors(stat)
-        print(session.char.query.get_all_contributors(stat))
-        print(contributors)
+        # print(session.char.query.get_all_contributors(stat))
+        # print(contributors)
         with ui.dialog().props("full-height") as dialog, ui.card() as card:
             card.classes("fixed-top-right w-2/5 q-pa-none h-full no-shadow").props("square bordered")
             with ui.scroll_area().classes("w-full h-full q-pa-none"):

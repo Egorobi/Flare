@@ -235,24 +235,29 @@ class Query:
 
     def get_variable_value(self, s):
         # return value directly
-        if s.isdigit() or ((s.startswith('-') or s.startswith('+')) and s[1:].isdigit()):
-            return int(s)
+        sign = 1
+        if (s.startswith('-') or s.startswith('+')):
+            if s.startswith('-'):
+                sign = -1
+            s = s[1:]
+        if s.isdigit():
+            return int(s) * sign
         # calculate half
         if s.endswith(":half"):
-            return self.get_variable_value(re.sub(":half$", "", s)) // 2
+            return self.get_variable_value(re.sub(":half$", "", s)) // 2  * sign
         elif s.endswith(":half:up"):
-            return -(self.get_variable_value(re.sub(":half:up$", "", s)) // -2)
+            return -(self.get_variable_value(re.sub(":half:up$", "", s)) // -2)  * sign
         # return variable
         if s in self.variables:
-            return self.variables[s]
+            return self.variables[s] * sign
         # calculate ability modifier
         if s.endswith(":modifier"):
-            return (self.get_variable_value(s.split(":")[0]+":score") - 10) // 2
+            return (self.get_variable_value(s.split(":")[0]+":score") - 10) // 2  * sign
         # calculate score
         # max of (score capped by max score) and set score
         if s.endswith(":score"):
             score = s.split(":")[0]
-            return max(min(self.variables[score], self.variables[score+":max"]), self.get_variable_value(score+":score:set"))
+            return max(min(self.variables[score], self.variables[score+":max"]), self.get_variable_value(score+":score:set")) * sign
         return 0
 
     def format_variables(self, string):

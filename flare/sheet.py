@@ -52,9 +52,6 @@ class Sheet():
         session.roll_dialog = RollDiceDialog()
         self.dice_roller = DiceRoller()
 
-        # print(session.roll_dialog.process_formula("(2d4 kh1)"))
-        # session.roll_dialog.wait_module("1d4x")
-
         ui.keyboard(self.handle_key)
 
         # spell id map
