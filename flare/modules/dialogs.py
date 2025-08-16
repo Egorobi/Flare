@@ -69,7 +69,7 @@ class RollDiceDialog(Module):
         self.shift_modifier = False
         self.state = {"opened": False}
 
-    async def wait_module(self, roll_formula):
+    async def wait_module(self, roll_formula, roll_name = None):
         if self.shift_modifier:
             roll_formula = re.sub(r"\d*d(\d+) ", lambda m: f"2d{m.group(1)}kh1 ", roll_formula)
         elif self.ctrl_modifier:
@@ -103,7 +103,7 @@ class RollDiceDialog(Module):
                 values.append(roll[1])
                 values.append(roll[0])
 
-            session.char.add_roll_history(roll_formula, result["total"], values)
+            session.char.add_roll_history(roll_formula, result["total"], values, roll_name)
 
             ui.card().classes("absolute-center w-full h-full frameborder frame no-shadow transparent")
 
@@ -264,6 +264,7 @@ class RollDiceDialog(Module):
             if color != "var(--q-adaptcolor)":
                 outline = f"-webkit-text-stroke: 0.5px var(--q-adaptcolor);"
                 # outline = f"text-shadow: 0px 0px 10px {color};"
+            color = "var(--q-adaptcolor)"
             if die == 100:
                 # ui.label(str(roll)).classes("text-xl mix-blend-difference absolute-center").style("color: {};".format(color))
                 # ui.label(str(roll)).classes("text-xl absolute-center").style("color: {}; background-color: rgba(0, 0, 0, 0.3); border-radius: 5px;".format(color))
@@ -323,12 +324,12 @@ class RollDiceDialog(Module):
 
 class RollContext(Module):
 
-    def show_module(self, modifier):
+    def show_module(self, modifier, roll_name=None):
         with ui.context_menu().classes("no-shadow adapttooltip").props(""):
             # ui.card().classes("frameborder absolute-center w-full h-full frame no-shadow transparent")
-            ui.menu_item('Advantage', lambda: session.roll_dialog.wait_module(f"2d20kh1 + {modifier}"), auto_close=False)
+            ui.menu_item('Advantage', lambda: session.roll_dialog.wait_module(f"2d20kh1 + {modifier}", roll_name=roll_name), auto_close=False)
             ui.separator().classes("w-full")
-            ui.menu_item('Disadvantage', lambda: session.roll_dialog.wait_module(f"2d20kl1 + {modifier}"), auto_close=False)
+            ui.menu_item('Disadvantage', lambda: session.roll_dialog.wait_module(f"2d20kl1 + {modifier}", roll_name=roll_name), auto_close=False)
 
 class StatInfo(Module):
 

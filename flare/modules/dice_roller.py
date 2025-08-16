@@ -36,7 +36,7 @@ class DiceRoller(Module):
                 .classes("q-ml-md").on("click", lambda: self.roll_formula_dialog()):
                 ui.tooltip("Custom formula").classes('text-sm').props("anchor='center right' self='center left'").classes("adapttooltip")
 
-        with ui.element('q-fab').props('icon=img:/assets/d20.svg color=theme direction=up outline label-class=dice-icon').classes("fixed-bottom-left frame q-ml-md q-mb-md") as parent:
+        with ui.element('q-fab').props("icon=img:/assets/d20.svg color=theme outline direction=up label-class=dice-icon").classes("fixed-bottom-left frame q-ml-md q-mb-md") as parent:
             parent.on("update:modelValue", lambda e: self.update_sideways_fab(e))
             count = [0 for i in range(7)]
             self.rolling_menu = parent
@@ -66,7 +66,7 @@ class DiceRoller(Module):
             with ui.column().classes("items-center"):
                 ui.label("Roll Custom Formula").classes("font-bold")
                 formula_input = ui.input("Roll formula", validation={'Invalid formula': lambda value: session.roll_dialog.check_formula(value)}).props("outlined")
-                ui.button("Create", on_click=lambda: session.roll_dialog.wait_module(formula_input.value)).props("outline").bind_enabled_from(formula_input, "value", backward=lambda value: session.roll_dialog.check_formula(value))
+                ui.button("Roll", on_click=lambda: session.roll_dialog.wait_module(formula_input.value)).props("outline").bind_enabled_from(formula_input, "value", backward=lambda value: session.roll_dialog.check_formula(value))
         dialog.open()
         self.sideways.run_method("show")
 

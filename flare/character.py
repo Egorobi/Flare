@@ -246,8 +246,8 @@ class Character:
     def get_roll_history(self):
         return self.saver.get_rolls(self.name)
 
-    def add_roll_history(self, roll_formula, result, values=None):
-        self.saver.record_roll(self.name, roll_formula, result, values=values)
+    def add_roll_history(self, roll_formula, result, values=None, roll_name=None):
+        self.saver.record_roll(self.name, roll_formula, result, values=values, roll_name=roll_name)
 
     def clear_roll_history(self):
         self.saver.clear_rolls(self.name)

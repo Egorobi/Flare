@@ -46,7 +46,7 @@ class RollLog(RollsListener):
             ui.space().classes("h-full")
             with ui.column().classes("w-full flex-col-reverse justify-end").style("gap:0.85rem;"):
                 for roll in roll_history:
-                    message = RollMessage(roll.attrib.get("roll", None), roll.attrib.get("result", None), roll.attrib.get("values", None))
+                    message = RollMessage(roll.attrib.get("roll", None), roll.attrib.get("result", None), roll.attrib.get("values", None), roll.attrib.get("name", None))
                     message.show_module()
                     ui.separator().classes("w-full")
         scroll.scroll_to(percent=100)
@@ -80,29 +80,33 @@ class RollLog(RollsListener):
 
 class RollMessage(Module):
 
-    def __init__(self, roll, result, values):
+    def __init__(self, roll, result, values, roll_name):
         self.roll = roll
         self.result = result
         if values is not None:
             self.values = values.split(",")
         else:
             self.values = values
+        self.roll_name = roll_name
 
     def show_module(self):
         with ui.card() as card:
             card.classes("items-center w-full q-py-xs transparent").props("")
-            card.style("box-shadow: 0 0 5px var(--q-primary) inset; backdrop-filter: brightness(90%);")
-            with ui.row().classes("w-full h-full items-center no-wrap justify-between").style("gap: 0rem;"):
-                ui.label(self.result).classes("text-2xl font-bold q-pr-sm")
-                ui.separator().props("vertical")
-                ui.label(self.roll).classes("text-sm text-slate-400 q-px-xs")
-                with ui.button(on_click=lambda: session.roll_dialog.wait_module(self.roll)).props("flat").classes("q-mr-sm q-pa-md items-center").style("width: 6rem;"):
-                    count = int(len(self.values) / 2)
-                    with ui.grid(columns = count if count < 5 else 4).style("gap: 1.5rem;"):
-                        session.roll_dialog.show_dice_values(values=self.values, size=5)
-                    ui.tooltip("Re-roll").classes("adapttooltip")
-            with ui.button(icon="bi-pin-angle", on_click=lambda: self.pin_dialog()).props("flat size=sm dense").classes("absolute-top-right"):
-                ui.tooltip("Pin as preset").classes("adapttooltip")
+            card.style("box-shadow: 0 0 5px var(--q-primary) inset;")
+            with ui.column().classes("items-start q-pa-none w-full h-full no-wrap").style("gap: 0.2rem;"):
+                if self.roll_name is not None:
+                    ui.label(self.roll_name).classes("font-bold")
+                with ui.row().classes("w-full h-full items-center no-wrap justify-between").style("gap: 0rem;"):
+                    ui.label(self.result).classes("text-2xl font-bold q-pr-sm")
+                    ui.separator().props("vertical")
+                    ui.label(self.roll).classes("text-sm text-slate-400 q-px-xs")
+                    with ui.button(on_click=lambda: session.roll_dialog.wait_module(self.roll)).props("flat").classes("q-mr-sm q-pa-md items-center").style("width: 6rem;"):
+                        count = int(len(self.values) / 2)
+                        with ui.grid(columns = count if count < 5 else 4).style("gap: 1.5rem;"):
+                            session.roll_dialog.show_dice_values(values=self.values, size=5)
+                        ui.tooltip("Re-roll").classes("adapttooltip")
+                with ui.button(icon="bi-pin-angle", on_click=lambda: self.pin_dialog()).props("flat size=sm dense").classes("absolute-top-right"):
+                    ui.tooltip("Pin as preset").classes("adapttooltip")
 
     def dice_count(self, roll_formula):
         matches = re.findall(r"(\d+)d(\d+)", roll_formula)
@@ -142,7 +146,7 @@ class RollPreset(RollMessage):
     def show_module(self):
         with ui.card() as card:
             card.classes("items-center w-full q-py-xs transparent").props("")
-            card.style("box-shadow: 0 0 5px var(--q-primary) inset; backdrop-filter: brightness(90%);")
+            card.style("box-shadow: 0 0 5px var(--q-primary) inset;")
             with ui.row().classes("w-full items-center no-wrap justify-between"):
                 with ui.column().classes("items-center justify-between").style("width: 0.1rem;"):
                     ui.button(icon="arrow_drop_up", on_click=lambda: self.move_preset("up")).props("flat size=xs dense")
@@ -152,7 +156,8 @@ class RollPreset(RollMessage):
                     with ui.label(self.roll).classes("text-md text-slate-400").on("click", lambda: self.pin_dialog(self.name)):
                         ui.tooltip("Edit formula").classes("adapttooltip")
                 with ui.row().classes("items-start no-wrap").style("gap:0.3rem;"):
-                    ui.button("Roll", on_click=lambda: session.roll_dialog.wait_module(self.roll)).props("outline").classes("q-mr-sm")
+                    roll_name = self.name
+                    ui.button("Roll", on_click=lambda: session.roll_dialog.wait_module(self.roll, roll_name)).props("outline").classes("q-mr-sm")
                     with ui.button(icon="bi-pin-angle-fill", on_click=lambda: self.remove_preset()).props("flat size=sm dense").classes("absolute-top-right"):
                         ui.tooltip("Remove pin").classes("adapttooltip")
 

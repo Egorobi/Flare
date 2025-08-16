@@ -322,7 +322,7 @@ class Saver():
 
     # ROLLS
 
-    def record_roll(self, name, roll_formula, result, values=None):
+    def record_roll(self, name, roll_formula, result, values=None, roll_name=None):
         filename = self.find_save_file(name)
         tree = et.parse(filename, self.parser)
         tree, history = self.get_sub_element("roll_history", None, tree)
@@ -333,6 +333,8 @@ class Saver():
         roll.attrib["result"] = str(result)
         if values is not None:
             roll.attrib["values"] = ",".join([str(v) for v in values])
+        if roll_name is not None:
+            roll.attrib["name"] = roll_name
         rolls.insert(0, roll)
         for i, r in enumerate(rolls):
             if i >= 20:

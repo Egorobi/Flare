@@ -137,7 +137,7 @@ class Sheet():
                 # Roll log
                 self.roll_log = RollLog()
                 with ui.page_sticky(x_offset=18, y_offset=18):
-                    ui.button(icon='history', on_click=lambda: self.roll_log.show_module()).props('fab color=primary outline size=md')
+                    ui.button(icon='history', on_click=lambda: self.roll_log.show_module()).props("fab color=primary outline size=md").style("")
             self.right_space = ui.space().style(r"width: 20rem;")
             self.right_space.bind_visibility_from(self.roll_log.state, "opened")
         # Help button

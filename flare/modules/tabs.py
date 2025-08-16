@@ -118,9 +118,10 @@ class Tabs(Module):
                         ui.html(f"<b>{m.group()}</b><b class='text-slate-400 text-xs'> ft.</b>").classes("col-2")
                     attack_bonus = re.search(r"[-+]?\d+", attack.attack)
                     attack_bonus = int(attack_bonus.group()) if attack_bonus is not None else 0
+                    attack_roll_name = f"{attack.name} Attack"
                     # ui.label(attack.attack).classes("col-2")
                     with ui.column().classes("items-center col-1"):
-                        with ui.button(session.val_to_string(attack_bonus), on_click=lambda mod=attack_bonus: session.roll_dialog.wait_module(f"1d20 + {mod}")).classes(
+                        with ui.button(session.val_to_string(attack_bonus), on_click=lambda mod=attack_bonus, attack_roll_name=attack_roll_name: session.roll_dialog.wait_module(f"1d20 + {mod}", attack_roll_name)).classes(
                                 "text-xl q-px-sm q-py-xs outline-btn").props("dense unelevated outline"):
                             context_menu = RollContext()
                             context_menu.show_module(attack_bonus)
@@ -133,7 +134,8 @@ class Tabs(Module):
                         polarity = 1 if m.group(3) == "+" else -1
                         damage_type = m.group(5)
                         damage_only = f"{num}d{die}{plus}{mod}"
-                        with ui.button(damage_only, on_click=lambda num=num, die=die, mod=mod*polarity: session.roll_dialog.wait_module(f"{num}d{die} + {mod}")).classes(
+                        damage_roll_name = f"{attack.name} Damage"
+                        with ui.button(damage_only, on_click=lambda num=num, die=die, mod=mod*polarity, damage_roll_name=damage_roll_name: session.roll_dialog.wait_module(f"{num}d{die} + {mod}", damage_roll_name)).classes(
                                 "q-px-sm font-normal q-py-xs outline-btn col-2").props("dense no-caps unelevated outline"):
                             if damage_type in icons.damage_type_map:
                                 ui.html(icons.damage_type_map[damage_type]).classes("q-pl-xs adaptcolor")
