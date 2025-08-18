@@ -113,13 +113,13 @@ class Settings():
                             ui.label(f.capitalize())
                     self.update_frame_select(self.saver.get_frame_style())
                 ui.separator()
-                
+
                 ui.label("Update Reminders").classes("font-bold text-primary text-xl")
                 ui.checkbox("Remind me about new Flare releases", value=Version(self.saver.get_version_reminder()) < Version(VERSION), on_change=lambda e: self.set_version_reminder(e.value))
                 ui.separator()
 
                 ui.label("Miscellaneous").classes("font-bold text-primary text-xl")
-                
+
                 with ui.row().classes("items-center"):
                     ui.label("App running on: ").classes("text-slate-400")
                     ui.code(f"http://localhost:{session.port}")

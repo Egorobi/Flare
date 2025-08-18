@@ -335,6 +335,8 @@ class CompendiumQuery:
                 if description_level <= self.level and description_level >= highest_level:
                     highest_level = description_level
                     sheet_description = desc.text
+                    if desc.attrib.get("usage", None) is not None:
+                        usage = desc.attrib.get("usage", None)
         else:
             sheet_description = None
 

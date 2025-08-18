@@ -185,6 +185,7 @@ class Query:
         wrapped = self.compendium.query_features_batch(ids)
         child_dict = {}
         for feature in wrapped:
+
             children = self.get_children_features(feature.feature_id)
             if len(children) > 0:
                 if feature.feature_id in child_dict:
@@ -193,8 +194,9 @@ class Query:
                     child_dict[feature.feature_id] = children
             if feature.sheet is not None:
                 feature.sheet = self.format_variables(feature.sheet)
-                if feature.usage is not None:
-                    feature.usage = self.format_variables(feature.usage)
+            if feature.usage is not None:
+                feature.usage = self.format_variables(feature.usage)
+            if feature.sheet is not None or feature.usage is not None:
                 if feature.feature_id not in child_dict:
                     child_dict[feature.feature_id] = []
                 features.append(feature)
@@ -262,7 +264,7 @@ class Query:
 
     def format_variables(self, string):
         try:
-            string = re.sub(r"{{([a-z: \-]*)}}", lambda m: str(self.get_variable_value(m.group(1))), string)
+            string = re.sub(r"\{\{([a-z: \-]*)\}\}", lambda m: str(self.get_variable_value(m.group(1))), string)
         except:
             print("Failed to find variable for: " + string)
         return string

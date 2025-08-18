@@ -71,13 +71,14 @@ class HeadModule(Module):
         # background-color: rgb({backrgb[0]*255}, {backrgb[1]*255}, {backrgb[2]*255});
         # background-image: linear-gradient(0.25turn, #151c24, #141414, #141414, #151c24);
         # filter: hue-rotate({hueRotation}deg) saturate({saturation}%) brightness({brightness}%);
+        # <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
         ui.add_head_html(f'''
         <script>
         window.onload = () => {{
             emitEvent('content_loaded');
         }};
         </script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="/assets/bootstrap-icons.min.css">
         <style type="text/tailwindcss" lang="scss">     
             body{{
                 font-family: "Roboto", sans-serif;

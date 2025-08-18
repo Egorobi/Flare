@@ -104,7 +104,8 @@ class SelectPage():
         filetypes = [('aurora fles', '*.dnd5e')]
         root.withdraw()
         root.attributes('-topmost', True)
-        file = fd.askopenfilename(filetypes=filetypes, title="Choose aurora character file", parent=root)
+        default = os.path.expanduser(r"~\Documents\5e Character Builder")
+        file = fd.askopenfilename(filetypes=filetypes, title="Choose aurora character file", parent=root, default=default)
         root.after_idle(root.attributes, '-topmost', False)
         # label.set_text(file)
         self.character_path = file
