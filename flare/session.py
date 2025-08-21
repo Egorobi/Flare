@@ -95,7 +95,7 @@ def set_spellslots(level, value):
     assert char is not None, "Character not set"
     used_slots = char.get_used_spellslots(level)
     if value:
-        used_slots = min(used_slots+1, char.get_total_spellslots()[level])
+        used_slots = min(used_slots+1, char.get_total_spellslots()[level-1])
     else:
         used_slots = max(0, used_slots-1)
     char.set_used_spellslots(level, used_slots)
@@ -126,9 +126,11 @@ async def perform_rest(rest_type):
                 char.set_charges(charge_id, max_uses)
     if rest_type == "long":
         # reset spells
-        for spellcast in char.spellcastings:
-            for i, slot in enumerate(spellcast.slots):
-                char.set_used_spellslots(i+1, max(char.get_used_spellslots(i+1) - slot, 0))
+        # for spellcast in char.spellcastings:
+        #     for i, slot in enumerate(spellcast.slots):
+        #         char.set_used_spellslots(i+1, max(char.get_used_spellslots(i+1) - slot, 0))
+        for i, slot in enumerate(char.get_total_spellslots()):
+            char.set_used_spellslots(i+1, 0)
         # restore health
         change_health(char.max_hp)
         # regain hitdice

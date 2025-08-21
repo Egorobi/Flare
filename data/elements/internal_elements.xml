@@ -737,7 +737,7 @@
             <p>Your capacity for spellcasting depends partly on your combined levels in all your spellcasting classes and partly on your individual levels in those classes. Once you have the Spellcasting feature from more than one class, use the rules below. If you multiclass but have the Spellcasting feature from only one class, you follow the rules as described in that class.</p>
         </description>
         <rules>
-            <stat name="multiclass:spellcasting:slot:1" value="2" level="1" />
+            <!-- <stat name="multiclass:spellcasting:slot:1" value="2" level="1" />
             <stat name="multiclass:spellcasting:slot:1" value="1" level="2" />
             <stat name="multiclass:spellcasting:slot:1" value="1" level="3" />
             <stat name="multiclass:spellcasting:slot:2" value="2" level="3" />
@@ -755,7 +755,7 @@
             <stat name="multiclass:spellcasting:slot:7" value="1" level="13" />
             <stat name="multiclass:spellcasting:slot:7" value="1" level="20" />
             <stat name="multiclass:spellcasting:slot:8" value="1" level="15" />
-            <stat name="multiclass:spellcasting:slot:9" value="1" level="17" />
+            <stat name="multiclass:spellcasting:slot:9" value="1" level="17" /> -->
         </rules>
     </element>
 

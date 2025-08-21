@@ -339,18 +339,31 @@ class Character:
     def get_available_spellslots(self):
         available = [False for _ in range(10)]
         available[0] = True
-        for i in range(1, 10):
-            for spellcasting in self.spellcastings:
-                if len(spellcasting.slots) >= i:
-                    available[i] = spellcasting.slots[i-1] > 0 or available[i]
+        # multiclass = self.read_variable("multiclass:spellcasting:level") > 0
+        # if multiclass:
+        #     slots = self.query.multiclass_to_spellslots()
+        #     for i in range(1, 10):
+        #         available[i] = slots[i-1] > 0 or available[i]
+        # for i in range(1, 10):
+        #     for spellcasting in self.spellcastings:
+        #         if multiclass and spellcasting.name != "Warlock": continue
+        #         if len(spellcasting.slots) >= i:
+        #             available[i] = spellcasting.slots[i-1] > 0 or available[i]
+        for level, slots in enumerate(self.get_total_spellslots()):
+            available[level+1] = slots > 0 or available[level+1]
         return available
 
     def get_total_spellslots(self):
-        total = [0 for _ in range(10)]
-        for i in range(1, 10):
+        # TODO check if warlock works
+        total = [0 for _ in range(9)]
+        multiclass = self.read_variable("multiclass:spellcasting:level") > 0
+        if multiclass:
+            total = self.query.multiclass_to_spellslots()
+        for i in range(1,10):
             for spellcasting in self.spellcastings:
+                if multiclass and spellcasting.name != "Warlock": continue
                 if len(spellcasting.slots) >= i:
-                    total[i] += spellcasting.slots[i-1]
+                    total[i-1] += spellcasting.slots[i-1]
         return total
 
     def calculate_total_coin_value(self, currency):

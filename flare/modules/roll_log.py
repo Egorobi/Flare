@@ -100,7 +100,7 @@ class RollMessage(Module):
                     ui.label(self.result).classes("text-2xl font-bold q-pr-sm")
                     ui.separator().props("vertical")
                     ui.label(self.roll).classes("text-sm text-slate-400 q-px-xs")
-                    with ui.button(on_click=lambda: session.roll_dialog.wait_module(self.roll)).props("flat").classes("q-mr-sm q-pa-md items-center").style("width: 6rem;"):
+                    with ui.button(on_click=lambda: session.roll_dialog.wait_module(self.roll, roll_name=self.roll_name)).props("flat").classes("q-mr-sm q-pa-md items-center").style("width: 6rem;"):
                         count = int(len(self.values) / 2)
                         with ui.grid(columns = count if count < 5 else 4).style("gap: 1.5rem;"):
                             session.roll_dialog.show_dice_values(values=self.values, size=5)
@@ -126,7 +126,7 @@ class RollMessage(Module):
             card.props("square")
             with ui.column().classes("items-center"):
                 ui.label("Create Roll Preset").classes("font-bold")
-                name_input = ui.input("Roll name").props("outlined")
+                name_input = ui.input("Roll name", value=self.roll_name if self.roll_name is not None else '').props("outlined")
                 if name is not None:
                     name_input.value = name
                 formula_input = ui.input("Roll formula", validation={'Invalid formula': lambda value: session.roll_dialog.check_formula(value)}).props("outlined")

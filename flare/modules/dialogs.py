@@ -87,6 +87,8 @@ class RollDiceDialog(Module):
             dialog.style("outline: dotted;")
             card.classes("no-shadow transparent")
             card.props("square")
+            if roll_name is not None:
+                ui.label(roll_name).classes("text-md font-bold")
             message = f"Rolled {roll_formula}"
             ui.label(message)
 

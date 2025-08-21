@@ -342,8 +342,9 @@ class Tabs(Module):
                                     if attack != 0:
                                         # label = session.valToString(char.readVariable(attack))
                                         with ui.row().classes("col-1"):
+                                            roll_name = f"{spell.name} Attack"
                                             with ui.button(session.val_to_string(attack)).classes(
-                                                "little=text outline-btn q-pa-none").props("dense unelevated outline").style("width:2rem;").on("click.stop", lambda mod=attack: session.roll_dialog.wait_module(f"1d20 + {mod}")):
+                                                "little=text outline-btn q-pa-none").props("dense unelevated outline").style("width:2rem;").on("click.stop", lambda mod=attack: session.roll_dialog.wait_module(f"1d20 + {mod}", roll_name=roll_name)):
                                                 context_menu = RollContext()
                                                 context_menu.show_module(attack)
                                     else:
@@ -1054,9 +1055,10 @@ class SpellSlots(SpellslotListener):
         # number of slots of this level available among all classes
         total = 0
         level = self.level
-        for spellcasting in session.char.spellcastings:
-            if len(spellcasting.slots) >= level:
-                total += spellcasting.slots[level-1]
+        # for spellcasting in session.char.spellcastings:
+        #     if len(spellcasting.slots) >= level:
+        #         total += spellcasting.slots[level-1]
+        total = session.char.get_total_spellslots()[level-1]
         for _ in range(0, total):
             box = ui.checkbox().on("click", lambda e, level=level: self.set_slots(level, e.sender.value)
                                 ).props("unchecked-icon=check_box_outline_blank checked-icon=disabled_by_default size=xl dense").classes("w-3 h-3")

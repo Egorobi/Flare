@@ -9,12 +9,13 @@ class Query:
 
     variables = {}
     variable_bonus = {}
+    levels = None
 
     def __init__(self, source_path, character_path):
         self.parser = et.XMLParser(remove_blank_text=False, compact=False, strip_cdata=False)
         self.character_file = character_path
         self.compendium = CompendiumQuery(source_path)
-        self.compendium.level = Query.query_level_from_file(character_path)
+        # self.compendium.level = Query.query_level_from_file(character_path)
         self.variables = {}
         self.variable_bonus = {} # (stat, bonus) -> value
         self.contributions = {} # stat -> [(stat, alt/element, value, bonus=None)]
@@ -94,6 +95,48 @@ class Query:
         for i in range(1, 10):
             for slot in spellcasting.findall("./slots"):
                 slots[i-1] = int(slot.attrib["s" + str(i)])
+        return slots
+
+    def multiclass_to_spellslots(self):
+        multiclass_level = self.get_variable_value("multiclass:spellcasting:level")
+        slots = [0 for _ in range(10)]
+        if multiclass_level >= 1:
+            slots[1] += 2
+        if multiclass_level >= 2:
+            slots[1] += 1
+        if multiclass_level >= 3:
+            slots[1] += 1
+            slots[2] += 2
+        if multiclass_level >= 4:
+            slots[2] += 1
+        if multiclass_level >= 5:
+            slots[3] += 2
+        if multiclass_level >= 6:
+            slots[3] += 1
+        if multiclass_level >= 7:
+            slots[4] += 1
+        if multiclass_level >= 8:
+            slots[4] += 1
+        if multiclass_level >= 9:
+            slots[4] += 1
+            slots[5] += 1
+        if multiclass_level >= 10:
+            slots[5] += 1
+        if multiclass_level >= 11:
+            slots[6] += 1
+        if multiclass_level >= 13:
+            slots[7] += 1
+        if multiclass_level >= 15:
+            slots[8] += 1
+        if multiclass_level >= 17:
+            slots[9] += 1
+        if multiclass_level >= 18:
+            slots[5] += 1
+        if multiclass_level >= 19:
+            slots[6] += 1
+        if multiclass_level >= 20:
+            slots[7] += 1
+        slots.pop(0)
         return slots
 
     def get_inventory(self):
@@ -242,6 +285,12 @@ class Query:
             if s.startswith('-'):
                 sign = -1
             s = s[1:]
+        if s == "level":
+            return self.get_level() * sign
+        if s == "level:half":
+            return self.get_level() // 2 * sign
+        if s == "level:half:up":
+            return -(self.get_level() // -2) * sign
         if s.isdigit():
             return int(s) * sign
         # calculate half
@@ -262,6 +311,31 @@ class Query:
             return max(min(self.variables[score], self.variables[score+":max"]), self.get_variable_value(score+":score:set")) * sign
         return 0
 
+    def get_level(self, level_class = "total"):
+        if self.levels is None:
+            # compute levels for character
+            self.levels = {}
+            self.levels["total"] = 0
+            parent_levels = self.find_character_elements("./build/elements/element[@type='Level']")
+            for level in parent_levels:
+                self.levels["total"] += 1
+                if level.attrib.get("name", 0) == "1":
+                    level_class = level.find("./element[@type='Class']").attrib["registered"]
+                    self.levels["main"] = level_class
+                    self.levels[level_class] = 1
+                    continue
+                if level.attrib.get("multiclass", None) == "true":
+                    multiclass = level.attrib.get("class", None)
+                    if level.attrib.get("starting", None) == "true":
+                        self.levels[multiclass] = 1
+                    else:
+                        self.levels[multiclass] += 1
+                else:
+                    self.levels[self.levels["main"]] += 1
+        if level_class not in self.levels:
+            level_class = "total"
+        return self.levels[level_class]
+
     def format_variables(self, string):
         try:
             string = re.sub(r"\{\{([a-z: \-]*)\}\}", lambda m: str(self.get_variable_value(m.group(1))), string)
@@ -271,9 +345,9 @@ class Query:
 
     def set_basic_variables_2(self):
         # level
-        self.variables["level"] = int(self.find_character_element(".//level").text)
-        self.variables["level:half"] = self.variables["level"] // 2
-        self.variables["level:half:up"] = -(self.variables["level"] // -2)
+        # self.variables["level"] = int(self.find_character_element(".//level").text)
+        # self.variables["level:half"] = self.variables["level"] // 2
+        # self.variables["level:half:up"] = -(self.variables["level"] // -2)
         # scores
         scores = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
         for score in scores:
@@ -345,7 +419,7 @@ class Query:
         string = string.replace("!", "not ")
         return string
 
-    def check_requirements(self, requirements, all_ids):
+    def check_requirements(self, requirements, all_ids, associated_class=None):
         print_debug = False
         # convert aurora operators to python operators
         requirements = self.translate_operators(requirements)
@@ -362,11 +436,11 @@ class Query:
             "cha": "charisma"
         }
         # convert stat requirements to bools
-        requirements = re.sub(r"\[([a-z ]*):(\d*)\]", lambda m: str(self.variables[score_map[m.group(1)]] >= int(m.group(2)) if m.group(1) in score_map else self.get_variable_value(m.group(1)) >= int(m.group(2))), requirements)
+        requirements = re.sub(r"\[([a-z :]*):(\d+)\]", lambda m: str(self.variables[score_map[m.group(1)]] >= int(m.group(2)) if m.group(1) in score_map else self.get_variable_value(m.group(1)) >= int(m.group(2))), requirements)
         # convert type requirements to bools
         requirements = re.sub(r"\[type:([a-z ]*)\]", lambda m: str(self.find_character_element(f".//element[@type='{m.group(1)}']") is not None), requirements)
         # convert level requirements to bools
-        requirements = re.sub(r"\[level:(\d*)\]", lambda m: str(self.variables["level"] >= int(m.group(1))), requirements)
+        requirements = re.sub(r"\[level:(\d+)\]", lambda m: str(self.get_level(associated_class) >= int(m.group(1))), requirements)
         if print_debug:
             print(requirements)
             print(eval(requirements))
@@ -591,11 +665,18 @@ class Query:
             self.add_to_variable(f"spellcasting:dc:{score[:3]}", 8+self.get_variable_value("proficiency")+self.get_variable_value(f"{score}:modifier"))
             self.add_to_variable(f"spellcasting:attack:{score[:3]}", self.get_variable_value("proficiency")+self.get_variable_value(f"{score}:modifier"))
 
+    def find_parent_class(self, element):
+        if element.tag == "elements" or element.tag == "character":
+            return None
+        if element.attrib.get("type", None) == "Class" or element.attrib.get("type", None) == "Multiclass":
+            return element.attrib.get("registered", None)
+        return self.find_parent_class(element.getparent())
 
     def compute_variables(self):
         elements = self.find_character_elements("./build/sum/element")
         all_ids = []
         # id_string = "["
+
         proficiencies = []
         for element in elements:
             # id_string += f"@id='{element.attrib["id"]}' or "
@@ -626,6 +707,18 @@ class Query:
         # for e in sorted_elements:
         #     print(e.attrib["id"])
 
+        # make dict that for each unique element stores what classes contain it
+        # when processing elements choose the first associated class (or none) and remove it from list
+        per_element_level = {}
+        element_classes = {}
+        for element in list(set(sorted_elements)):
+            element_classes[element.attrib["id"]] = []
+            for instance in self.find_character_elements(f"./build/elements//element[@registered='{element.attrib["id"]}'  or @id='{element.attrib["id"]}']"):
+                element_classes[element.attrib["id"]].append(self.find_parent_class(instance))
+                per_element_level[element.attrib["id"]] = self.get_level(element_classes[element.attrib["id"]][0])
+        per_element_level["total"] = self.get_level()
+        self.compendium.per_id_level = per_element_level
+
         equipped = []
         for item in self.find_character_elements(".//item"):
             equip = item.find("./equipped")
@@ -637,10 +730,15 @@ class Query:
         self.equipped = equipped
 
         for element in sorted_elements:
+            associated_class = None
+            if len(element_classes[element.attrib["id"]]) > 0:
+                associated_class = element_classes[element.attrib["id"]].pop(0)
+            # print(element.attrib["id"])
+            # print(self.get_level(associated_class))
             for stat in element.findall("./rules/stat"):
                 contribition_name = stat.attrib.get("alt", element.attrib.get("name", "unknown"))
                 # contributionName = stat.attrib.get("alt", None)
-                self.process_stat(stat, contribition_name)
+                self.process_stat(stat, contribition_name, associated_level=self.get_level(associated_class))
 
         self.apply_final_variables()
 
@@ -650,7 +748,8 @@ class Query:
         # print(self.getContributors("ac:calculation"))
         # print(self.formatContributors("ac:calculation"))
 
-    def process_stat(self, stat, contributor):
+    def process_stat(self, stat, contributor, associated_level=None):
+        # IF ASSOCIATED LEVEL NONE SET TO CHARACTER LEVEL
         print_debug = False
         if stat.attrib.get("requirements") is not None:
             if not self.check_requirements(stat.attrib["requirements"], self.all_ids):
@@ -658,7 +757,11 @@ class Query:
                     print(f"Skippping (requirement) {stat.attrib["name"]}, {contributor}")
                 return
         if stat.attrib.get("level") is not None:
-            if int(stat.attrib["level"]) > self.variables["level"]:
+            # TODO: REPLACE THIS WITH PER-CLASS LEVEL
+
+            # check parent class element in elements
+            # get level for that class and compare
+            if int(stat.attrib["level"]) > associated_level:
                 return
         equip_requirement = stat.attrib.get("equipped")
         if equip_requirement is not None:

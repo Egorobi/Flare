@@ -9,7 +9,8 @@ class CompendiumQuery:
     def __init__(self, source_path):
         self.source_path = source_path
 
-        self.level = None # used only when querying for a character
+        # self.level = None # used only when querying for a character
+        self.per_id_level = {}
 
         if len(storage.compendium) == 0:
             self.fill_compendium()
@@ -332,7 +333,8 @@ class CompendiumQuery:
             sheet_description = None
             for desc in sheet_descriptions:
                 description_level = int(desc.attrib.get("level", 0))
-                if description_level <= self.level and description_level >= highest_level:
+                element_level = self.per_id_level.get(feature_id, self.per_id_level["total"])
+                if description_level <= element_level and description_level >= highest_level:
                     highest_level = description_level
                     sheet_description = desc.text
                     if desc.attrib.get("usage", None) is not None:
