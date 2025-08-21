@@ -301,14 +301,18 @@ class Query:
         # return variable
         if s in self.variables:
             return self.variables[s] * sign
+        scores = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
         # calculate ability modifier
         if s.endswith(":modifier"):
-            return (self.get_variable_value(s.split(":")[0]+":score") - 10) // 2  * sign
+            score = s.split(":")[0]
+            if score in scores:
+                return (self.get_variable_value(s.split(":")[0]+":score") - 10) // 2  * sign
         # calculate score
         # max of (score capped by max score) and set score
         if s.endswith(":score"):
             score = s.split(":")[0]
-            return max(min(self.variables[score], self.variables[score+":max"]), self.get_variable_value(score+":score:set")) * sign
+            if score in scores:
+                return max(min(self.variables[score], self.variables[score+":max"]), self.get_variable_value(score+":score:set")) * sign
         return 0
 
     def get_level(self, level_class = "total"):
@@ -688,17 +692,25 @@ class Query:
         self.set_basic_variables()
         self.all_ids = all_ids
 
-        # if len(id_string) > 1:
-        #     id_string = id_string[:-4]
-        # id_string += "]"
-        # query = ".//element" + id_string
         real_elements = []
         # unsorted list of elements in compendium
         for real_element in self.compendium.find_all_elements(element_ids=all_ids):
             real_elements.append(real_element)
         # sort elements from compendium
+        # add all elements selected in build in order, then add the remaining elements
         sorted_elements = []
+        added_ids = []
+        for _, build_element in et.iterwalk(self.find_character_element("./build/elements")):
+            for e in real_elements:
+                if e.attrib["id"] == build_element.attrib.get("registered", build_element.attrib.get("id", None)):
+                    sorted_elements.append(e)
+                    added_ids.append(e.attrib["id"])
+                    break
         for char_element in elements:
+            if char_element.attrib["id"] in added_ids:
+                # element already added, ignore this instance
+                added_ids.pop(added_ids.index(char_element.attrib["id"]))
+                continue
             for e in real_elements:
                 if e.attrib["id"] == char_element.attrib["id"]:
                     sorted_elements.append(e)
