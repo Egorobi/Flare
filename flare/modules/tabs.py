@@ -344,7 +344,7 @@ class Tabs(Module):
                                         with ui.row().classes("col-1"):
                                             roll_name = f"{spell.name} Attack"
                                             with ui.button(session.val_to_string(attack)).classes(
-                                                "little=text outline-btn q-pa-none").props("dense unelevated outline").style("width:2rem;").on("click.stop", lambda mod=attack: session.roll_dialog.wait_module(f"1d20 + {mod}", roll_name=roll_name)):
+                                                "little=text outline-btn q-pa-none").props("dense unelevated outline").style("width:2rem;").on("click.stop", lambda mod=attack, roll_name=roll_name: session.roll_dialog.wait_module(f"1d20 + {mod}", roll_name=roll_name)):
                                                 context_menu = RollContext()
                                                 context_menu.show_module(attack)
                                     else:
@@ -385,7 +385,7 @@ class Tabs(Module):
                                     elif shape == "cylinder":
                                         notes += f"{spell.shape[1][0]}ft,{spell.shape[1][1]}ft"
                                         icon = icons.CYLINDER_SVG
-                                notes += spell.keywords
+                                notes += " " + spell.keywords
                                 with ui.row().classes("text-slate-400 q-pr-sm").style("gap: 0.1em"):
                                     components = self.compile_spell_components(spell.components, None)
                                     ui.label(components)
@@ -440,7 +440,7 @@ class Tabs(Module):
         elif level == 3:
             return "3rd"
         else:
-            return str(level) + "TH LEVEL"
+            return str(level) + "th"
 
     def compile_spell_components(self, comps, material):
         components = ""

@@ -38,11 +38,11 @@ class Spell:
         self.keywords = re.sub(r"(\w),(\w)", lambda m: f"{m.group(1)}, {m.group(2)}", self.keywords)
         # try find spell shape
         # sphere
-        cylinder_parse = re.search(r"[\d]*-foot radius* [\d]*-foot-high", self.description)
-        sphere_parse = re.search(r"[\d]*-foot-radius", self.description)
-        square_parse = re.search(r"[\d]*-foot square", self.description)
-        cube_parse = re.search(r"[\d]*-foot cube", self.description)
-        cone_parse = re.search(r"[\d]*-foot cone", self.description)
+        cylinder_parse = re.search(r"[\d]*[- ]foot[- ]radius*[,\s]*[\d]*[- ]foot[- ]high", self.description)
+        sphere_parse = re.search(r"[\d]*[- ]foot[- ]radius", self.description)
+        square_parse = re.search(r"[\d]*[- ]foot square", self.description)
+        cube_parse = re.search(r"[\d]*[- ]foot cube", self.description)
+        cone_parse = re.search(r"[\d]*[- ]foot cone", self.description)
 
         if cylinder_parse is not None:
             dims = cylinder_parse.group().split(" ")

@@ -164,12 +164,12 @@ class SelectPage():
         # get latest release version
         try:
             response = requests.get("https://api.github.com/repos/Egorobi/Flare/releases/latest", timeout=5)
+            if response.raise_for_status() is not None:
+                # response error
+                return
         except requests.exceptions.Timeout:
             return
         except requests.exceptions.RequestException:
-            return
-        if response.raise_for_status() is not None:
-            # response error
             return
         latest_version = Version(response.json()["tag_name"])
 
