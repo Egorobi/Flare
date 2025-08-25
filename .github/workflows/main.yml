@@ -2,7 +2,7 @@ name: Make Executables
 on:
   workflow_dispatch:
 jobs:
-  pyinstaller-build:
+  pyinstaller-build-windows:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -24,7 +24,6 @@ jobs:
         shell: cmd
         run: |
            venv\Scripts\pyinstaller.exe Flare.spec --noconfirm
-           echo "::debug::%CD%"
            
       - name: Upload windows executable folder as ZIP
         uses: actions/upload-artifact@v4
@@ -42,3 +41,32 @@ jobs:
         with:
           name: windows-installer
           path: Output/
+
+  pyinstaller-build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          
+      - name: Create virtual environment
+        shell: bash
+        run: |
+          python -m venv venv
+          venv/bin/python -m pip install --upgrade pip
+          venv/bin/python -m pip install -r requirements.txt
+          
+      - name: Create linux executable
+        shell: bash
+        run: |
+           venv/bin/pyinstaller Flare.spec --noconfirm
+           
+      - name: Upload linux executable folder as ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-executable
+          path: dist/Flare/
