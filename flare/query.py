@@ -529,8 +529,8 @@ class Query:
         requirement = self.translate_operators(requirement)
         # armor type check
         # NOTE: not counting shield as armor for requirements
-        requirement = re.sub(r"\[armor:none\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor) and i.armor_type.lower() == "shield"]) == 0), requirement)
-        requirement = re.sub(r"\[armor:any\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor)]) > 0), requirement)
+        requirement = re.sub(r"\[armor:none\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor) and i.armor_type.lower() != "shield"]) == 0), requirement)
+        requirement = re.sub(r"\[armor:any\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor) and i.armor_type.lower() != "shield"]) > 0), requirement)
         requirement = re.sub(r"\[armor:([a-z- ]*)\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor) and i.armor_type.lower() == m.group(1).lower()]) > 0), requirement)
         # shield check TODO improve
         requirement = re.sub(r"\[shield:none\]", lambda m: str(len([1 for i in equipped if isinstance(i, Armor) and i.armor_type.lower() == "shield"]) == 0), requirement)
