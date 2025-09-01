@@ -4,6 +4,7 @@ import math
 from lxml import etree as et
 from wrappers import Attack, Spellcasting, Armor, Background, InventoryItem
 from compendium_query import CompendiumQuery
+from logic_solver import LogicSolver
 
 class Query:
 
@@ -447,10 +448,9 @@ class Query:
         requirements = re.sub(r"\[level:(\d+)\]", lambda m: str(self.get_level(associated_class) >= int(m.group(1))), requirements)
         if print_debug:
             print(requirements)
-            print(eval(requirements))
-        # NOTE: literal_eval can't handle boolean expressions like "not False"
+            print(LogicSolver.solve_expression(requirements))
         try:
-            return eval(requirements)
+            return LogicSolver.solve_expression(requirements)
         except:
             return False
 
@@ -548,7 +548,7 @@ class Query:
         # requirement = re.sub
 
         try:
-            return eval(requirement)
+            return LogicSolver.solve_expression(requirement)
         except:
             return False
 
@@ -761,7 +761,8 @@ class Query:
         # print(self.formatContributors("ac:calculation"))
 
     def process_stat(self, stat, contributor, associated_level=None):
-        # IF ASSOCIATED LEVEL NONE SET TO CHARACTER LEVEL
+        if associated_level is None:
+            associated_level = self.get_level()
         print_debug = False
         if stat.attrib.get("requirements") is not None:
             if not self.check_requirements(stat.attrib["requirements"], self.all_ids):
@@ -769,10 +770,6 @@ class Query:
                     print(f"Skippping (requirement) {stat.attrib["name"]}, {contributor}")
                 return
         if stat.attrib.get("level") is not None:
-            # TODO: REPLACE THIS WITH PER-CLASS LEVEL
-
-            # check parent class element in elements
-            # get level for that class and compare
             if int(stat.attrib["level"]) > associated_level:
                 return
         equip_requirement = stat.attrib.get("equipped")
