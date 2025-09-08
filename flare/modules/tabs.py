@@ -313,13 +313,15 @@ class Tabs(Module):
                                 if spell.concentration:
                                     self.concetrate_context(spell.spell_id, spell.level)
                                 spell_row.on('click', lambda id=spell.spell_id: self.show_spell_info(id))
-                                with ui.column().classes("w-full col-3 justify-start").style("gap: 0.1em"):
+                                with ui.column().classes("w-full col-3 justify-start").style("gap: 0.2rem;"):
                                     with ui.row().classes("w-full").style("gap: 0.1em"):
                                         ui.label(spell.name).classes("italic")
                                         if spell.concentration:
-                                            ui.icon("copyright").classes("q-pt-xs")
+                                            # ui.icon("copyright").classes("q-pt-xs")
+                                            ui.label("(C)").classes("italic")
                                         if spell.ritual:
-                                            ui.icon("book_2").classes("q-pt-xs q-pl-md")
+                                            # ui.icon("book_2").classes("q-pt-xs q-pl-md")
+                                            ui.label("(R)").classes("italic")
                                     ui.label(spell.source).classes("tiny-text h-1 text-slate-400")
                                 cast = ""
                                 if "1 action" in spell.cast:
