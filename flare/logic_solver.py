@@ -14,12 +14,12 @@ class LogicSolver():
 
         while " " in expression:
             # evaluate not
-            expression = re.sub(r"not (\w*)", lambda m: str(m.group(1) == "False"), expression)
+            expression = re.sub(r"not (\w*)", lambda m: str(m.group(1) == "False"), expression, 1)
             # evaluate and
-            expression = re.sub(r"(\w*) and (\w*)", lambda m: str(m.group(1) == "True" and m.group(2) == "True"), expression)
+            expression = re.sub(r"(\w*) and (\w*)", lambda m: str(m.group(1) == "True" and m.group(2) == "True"), expression, 1)
             # evaluate or
-            expression = re.sub(r"(\w*) or (\w*)", lambda m: str(m.group(1) == "True" or m.group(2) == "True"), expression)
-
+            expression = re.sub(r"(\w*) or (\w*)", lambda m: str(m.group(1) == "True" or m.group(2) == "True"), expression, 1)
+        
         if expression == "True":
             return True
         elif expression == "False":
