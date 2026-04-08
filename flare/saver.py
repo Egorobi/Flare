@@ -143,6 +143,14 @@ class Saver():
     def get_zoom(self):
         return float(self.get_setting("zoom", "1"))
 
+    def get_file_watch(self):
+        return self.get_setting("watch_file", True)
+    
+    def save_file_watch(self, watch_file: bool):
+        settings = self.get_global_settings()
+        settings["watch_file"] = watch_file
+        self.write_global_settings(settings)
+
     ### CUSTOM
 
     def write_custom_colors(self, colors):
@@ -300,6 +308,8 @@ class Saver():
         if hitpoints.attrib.get("current") is None:
             hitpoints.attrib["current"] = str(max_hp)
             tree.write(filename, pretty_print=True)
+        hitpoints.attrib["current"] = str(min(int(hitpoints.attrib["current"]), max_hp))
+        tree.write(filename, pretty_print=True)
         current = int(hitpoints.attrib["current"])
         temp = int(hitpoints.attrib["temp"])
         return current, temp

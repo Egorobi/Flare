@@ -123,6 +123,8 @@ class Settings():
                 with ui.row().classes("items-center"):
                     ui.label("App running on: ").classes("text-slate-400")
                     ui.code(f"http://localhost:{session.port}")
+                
+                ui.checkbox("Auto-reload on character update", value=self.saver.get_file_watch(), on_change=lambda e: self.saver.save_file_watch(e.value))
 
                 ui.button("Report a Problem", on_click=lambda: ui.navigate.to('https://github.com/Egorobi/Flare', new_tab=True)).props("outline")
 

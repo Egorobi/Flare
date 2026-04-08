@@ -343,7 +343,7 @@ class Query:
 
     def format_variables(self, string):
         try:
-            string = re.sub(r"\{\{([a-z: \-]*)\}\}", lambda m: str(self.get_variable_value(m.group(1))), string)
+            string = re.sub(r"\{\{([\w\d: \-]*)\}\}", lambda m: str(self.get_variable_value(m.group(1))), string)
         except:
             print("Failed to find variable for: " + string)
         return string
@@ -470,6 +470,7 @@ class Query:
 
 
     def compute_stat(self, stat, contributor):
+
         if not stat.attrib["name"] in self.variables:
             self.variables[stat.attrib["name"]] = 0
         # types of bonus
@@ -697,10 +698,10 @@ class Query:
         for real_element in self.compendium.find_all_elements(element_ids=all_ids):
             real_elements.append(real_element)
         # sort elements from compendium
-        # add all elements selected in build in order, then add the remaining elements
+        # add all elements selected in build in order, parent is added before children, then add the remaining elements
         sorted_elements = []
         added_ids = []
-        for _, build_element in et.iterwalk(self.find_character_element("./build/elements")):
+        for _, build_element in et.iterwalk(self.find_character_element("./build/elements"), events=("start",)):
             for e in real_elements:
                 if e.attrib["id"] == build_element.attrib.get("registered", build_element.attrib.get("id", None)):
                     sorted_elements.append(e)

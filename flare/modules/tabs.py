@@ -144,6 +144,7 @@ class Tabs(Module):
                         ui.label(attack.damage).classes("col-2")
                     ui.label(attack.notes).classes("col-2 text-xs text-slate-400")
                 ui.separator()
+        self.show_unarmed_strike()
 
     def show_actions(self, all_features):
         with ui.column().classes("w-full q-py-none").style("gap:0.8rem"):
@@ -152,19 +153,21 @@ class Tabs(Module):
                 with ui.row().classes("w-full no-wrap"):
                     ui.separator().props("vertical")
                     ui.label("Attack, Dash, Disengage, Dodge, Grapple, Help, Hide, Improvise, Influence, Magic, Ready, Search, Shove, Study, Utilize")
-                with ui.column().classes("w-full").style("gap:0.1rem"):
-                    ui.label("Unarmed Strike").classes("font-bold")
-                    unarmed_strike = """
-                    <p>You make a melee attack that involves using your body to deal one of the following effects:</p>
-                    <p><i><strong>Damage</strong></i>. You make an attack roll against the creature (Prof. Bonus + Str.), and on a hit, you deal 1 + STR Bludgeoning damage.</p>
-                    <p><i><strong>Grapple</strong></i>. The target must succeed on a Str./Dex. (it chooses which) saving throw (DC = 8 + Prof. Bonus + Str.) or it has the Grappled condition.</p>
-                    <p><i><strong>Shove</strong></i>. The target must succeed on a Str./Dex. (it chooses which) saving throw (DC = 8 + Prof. Bonus + Str.) or you can either push it 5 ft. away or cause it to have the Prone condition.</p>
-                    """
-                    ui.html(unarmed_strike).classes("text-xs")
             for feature in all_features:
                 if feature.action == "Action":
                     feature_module = Feature(feature)
                     feature_module.show_module()
+
+    def show_unarmed_strike(self):
+        with ui.column().classes("w-full").style("gap:0.1rem"):
+            ui.label("Unarmed Strike").classes("font-bold")
+            unarmed_strike = """
+            <p>You make a melee attack that involves using your body to deal one of the following effects:</p>
+            <p><i><strong>Damage</strong></i>. You make an attack roll against the creature (Prof. Bonus + Str.), and on a hit, you deal 1 + STR Bludgeoning damage.</p>
+            <p><i><strong>Grapple</strong></i>. The target must succeed on a Str./Dex. (it chooses which) saving throw (DC = 8 + Prof. Bonus + Str.) or it has the Grappled condition.</p>
+            <p><i><strong>Shove</strong></i>. The target must succeed on a Str./Dex. (it chooses which) saving throw (DC = 8 + Prof. Bonus + Str.) or you can either push it 5 ft. away or cause it to have the Prone condition.</p>
+            """
+            ui.html(unarmed_strike).classes("text-xs")
 
     def show_bonus_actions(self, all_features):
         with ui.column().classes("w-full q-py-none").style("gap:0.8rem"):
@@ -232,7 +235,7 @@ class Tabs(Module):
                 ui.label("SPECIAL").classes("text-primary font-bold")
                 ui.separator().props("color=primary")
             for feature in all_features:
-                if feature.action == "Other" or feature.action == "Special":
+                if (feature.action or feature.usage) and feature.action != "Action" and feature.action != "Bonus Action" and feature.action != "Reaction":
                     feature_module = Feature(feature)
                     feature_module.show_module()
 

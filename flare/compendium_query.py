@@ -142,7 +142,7 @@ class CompendiumQuery:
                             deepcopy(components),
                             self.read_setter(entry, "materialComponent") if self.read_setter(entry, "hasMaterialComponent") == "true" else None,
                             description,
-                            spell.attrib.get("source") if source is None else source,
+                            f"{source} ({entry.attrib.get("source")})" if source else f"{spell.attrib.get("source")} ({entry.attrib.get("source")})",
                             self.read_setter(entry, "keywords"),
                             spell_type = spell_type,
                             save_type=save_type)
@@ -316,7 +316,8 @@ class CompendiumQuery:
         name = feature.attrib["name"]
         feature_id = feature.attrib["id"]
         # print(name)
-        description = et.tostring(feature.find("./description"), method='xml',with_tail=False).decode('UTF-8')
+        description = feature.find("./description")
+        description = et.tostring(description, method='xml',with_tail=False).decode('UTF-8') if description else ""
         usage = None
         action = None
         display = True

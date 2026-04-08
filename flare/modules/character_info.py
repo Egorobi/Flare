@@ -1,4 +1,5 @@
 import re
+import os
 from nicegui import ui
 from modules.module import Module
 from modules.loader import LoadingDialog
@@ -14,6 +15,10 @@ class CharacterDetails(Module):
     def __init__(self, char):
         super().__init__()
         self.char = char
+        self.last_char_modified = os.path.getmtime(self.char.save_file_path)
+        # watch aurora file for changes
+        if char.saver.get_file_watch():
+            ui.timer(1.0, lambda: self.check_character_update())
 
     def show_module(self):
         char = self.char
@@ -69,6 +74,11 @@ class CharacterDetails(Module):
         loader = LoadingDialog()
         loader.wait_module()
         session.set_page_color(scheme)
+    
+    def check_character_update(self):
+        if self.last_char_modified != os.path.getmtime(self.char.save_file_path):
+            self.reload()
+
 
 class MovementSpeed(Module):
     ac_size = 7
